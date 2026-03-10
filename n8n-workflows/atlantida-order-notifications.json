@@ -1,0 +1,55 @@
+{
+  "name": "Atlantida - Order Notifications (WhatsApp)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "atlantida-order-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Order Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "atlantida-order-webhook"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "1017967411400401",
+        "recipientPhoneNumber": "18099194205",
+        "textBody": "={{ $json.body.message }}"
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000002",
+      "name": "WhatsApp Notification",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [500, 300],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp API account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Order Webhook": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

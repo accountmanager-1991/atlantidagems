@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="175" viewBox="0 0 200 175">
+<defs>
+  <linearGradient id="ambarG" x1="20%" y1="0%" x2="80%" y2="100%">
+    <stop offset="0%" style="stop-color:#FFB830"/>
+    <stop offset="55%" style="stop-color:#D06800"/>
+    <stop offset="100%" style="stop-color:#6B3000"/>
+  </linearGradient>
+  <linearGradient id="larimarG" x1="20%" y1="0%" x2="80%" y2="100%">
+    <stop offset="0%" style="stop-color:#72CCE0"/>
+    <stop offset="55%" style="stop-color:#1A7A9E"/>
+    <stop offset="100%" style="stop-color:#081E2E"/>
+  </linearGradient>
+  <linearGradient id="goldG" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#EDD8A0"/>
+    <stop offset="50%" style="stop-color:#C9A84C"/>
+    <stop offset="100%" style="stop-color:#9A7020"/>
+  </linearGradient>
+</defs>
+<rect width="200" height="175" fill="#FAF7F0"/>
+<g transform="translate(10,8) scale(1.5,1.5)">
+  <path d="M36,6 C20,22 14,42 14,54 C14,74 24,86 36,86 C48,86 58,74 58,54 C58,42 52,22 36,6Z"
+        fill="url(#ambarG)" stroke="url(#goldG)" stroke-width="1.8"/>
+  <ellipse cx="28" cy="36" rx="6" ry="14" fill="#FFFFFF" opacity="0.14" transform="rotate(-10,28,36)"/>
+  <circle cx="40" cy="62" r="4" fill="#3C1A00" opacity="0.5" stroke="#C06400" stroke-width="0.7"/>
+  <circle cx="32" cy="52" r="2" fill="#FFB830" opacity="0.6"/>
+  <path d="M84,6 C68,22 62,42 62,54 C62,74 72,86 84,86 C96,86 106,74 106,54 C106,42 100,22 84,6Z"
+        fill="url(#larimarG)" stroke="url(#goldG)" stroke-width="1.8"/>
+  <path d="M62,60 Q68,54 76,58 Q82,62 84,58 Q86,54 92,58 Q98,62 106,58 L106,70 Q98,74 92,70 Q86,66 84,70 Q82,74 76,70 Q68,66 62,70Z"
+        fill="#3AADCC" opacity="0.45"/>
+  <path d="M62,72 Q70,66 78,70 Q84,74 90,70 Q98,66 106,70 L106,86 Q96,90 84,86 Q72,82 62,86Z"
+        fill="#72CCE0" opacity="0.3"/>
+  <path d="M36,6 Q60,0 84,6" fill="none" stroke="#C9A84C" stroke-width="1.2" opacity="0.7"/>
+  <circle cx="60" cy="5" r="3.5" fill="#C9A84C" opacity="0.9"/>
+  <text x="36" y="52" font-family="Georgia,serif" font-size="13" font-weight="600" fill="#0E3A54" opacity="0.6" text-anchor="middle">A</text>
+  <text x="84" y="52" font-family="Georgia,serif" font-size="13" font-weight="600" fill="#0E3A54" opacity="0.6" text-anchor="middle">L</text></g>
+</svg>

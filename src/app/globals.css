@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Brand Colors — Ambar & Larimar Shop */
+  --color-ambar-light: #FFB830;
+  --color-ambar: #D06800;
+  --color-ambar-deep: #6B3000;
+  --color-larimar: #3AADCC;
+  --color-larimar-mid: #1A7A9E;
+  --color-larimar-deep: #0E3A54;
+  --color-gold: #C9A84C;
+  --color-gold-light: #EDD8A0;
+  --color-silver: #C0C0C0;
+  --color-cream: #FAF7F0;
+  --color-cream-dark: #F0EBE0;
+  --color-navy: #0C1420;
+  --color-midnight: #08080E;
+  /* Semantic aliases */
+  --color-ocean: #0E3A54;
+  --color-ocean-light: #1A7A9E;
+  --color-ocean-dark: #0C1420;
+  --color-dark: #08080E;
+  --color-dark-light: #0C1420;
+
+  /* Font Families */
+  --font-heading: "Cinzel", serif;
+  --font-body: "Cormorant Garamond", serif;
+  --font-ui: "Montserrat", sans-serif;
+
+  /* Spacing */
+  --spacing-section: 6rem;
+  --spacing-section-sm: 4rem;
+}
+
+/* ========== LIGHT MODE (default) ========== */
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ocean);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ========== DARK MODE ========== */
+[data-theme="dark"] body {
+  background-color: var(--color-midnight);
+  color: var(--color-cream);
+}
+
+/* Dark mode component overrides */
+[data-theme="dark"] .bg-cream {
+  background-color: var(--color-midnight) !important;
+}
+
+[data-theme="dark"] .bg-cream\/95 {
+  background-color: rgba(8, 8, 14, 0.95) !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--color-navy) !important;
+}
+
+[data-theme="dark"] .text-ocean {
+  color: var(--color-cream) !important;
+}
+
+[data-theme="dark"] .text-ocean\/70 {
+  color: rgba(250, 247, 240, 0.7) !important;
+}
+
+[data-theme="dark"] .text-ocean\/60 {
+  color: rgba(250, 247, 240, 0.6) !important;
+}
+
+[data-theme="dark"] .text-ocean\/50 {
+  color: rgba(250, 247, 240, 0.5) !important;
+}
+
+[data-theme="dark"] .text-ocean\/40 {
+  color: rgba(250, 247, 240, 0.4) !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: var(--color-cream) !important;
+}
+
+[data-theme="dark"] .border-gold\/20 {
+  border-color: rgba(201, 168, 76, 0.15) !important;
+}
+
+[data-theme="dark"] .border-gold\/10 {
+  border-color: rgba(201, 168, 76, 0.1) !important;
+}
+
+/* Dark mode footer - already dark, keep as-is */
+[data-theme="dark"] footer.bg-navy {
+  background-color: #060810 !important;
+}
+
+/* ========== READABILITY OVERRIDES ========== */
+/* Boost body text contrast — ocean at 70%/60% is too faint on cream */
+.text-ocean\/70 {
+  color: rgba(14, 58, 84, 0.85) !important;
+}
+.text-ocean\/60 {
+  color: rgba(14, 58, 84, 0.75) !important;
+}
+.text-ocean\/50 {
+  color: rgba(14, 58, 84, 0.65) !important;
+}
+
+/* Make body font (Cormorant Garamond) more readable */
+.font-body {
+  font-weight: 500;
+}
+
+/* Gold divider */
+.gold-divider {
+  height: 1px;
+  background-color: var(--color-gold);
+  opacity: 0.3;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--color-midnight);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ambar);
+}
+
+/* Animation utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
