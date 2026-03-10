@@ -316,3 +316,41 @@
 - `src/app/api/admin/orders/[id]/route.ts` — admin order update (triggers shipping notifications)
 - `src/lib/email-templates.ts` — `getTrackingUrl()` helper + `shippingConfirmationEmail()`
 - `src/components/admin/OrdersManager.tsx` — admin UI for order management
+
+---
+
+## D017: Phase 1 security hardening — checkout, validation, escaping
+
+**Date:** 2026-03-09
+**Status:** Accepted
+
+**Context:** Full site audit revealed critical security gaps before launch: checkout continued if DB failed, no server-side input validation, raw user data in email HTML, no SEO infrastructure, no error pages.
+
+**Decision:** Implement pre-launch hardening as Phase 1 before any other feature work.
+
+**Changes made:**
+1. **Checkout fails if DB fails** — order must save before Stripe session is created
+2. **Server-side validation** — email regex, string type/length checks, required field enforcement on all 3 form endpoints (checkout, contact, wholesale)
+3. **HTML escaping in emails** — `escapeHtml()` function applied to all user-provided data in email templates to prevent XSS
+4. **SEO** — dynamic sitemap (static + product pages), robots.txt (blocks admin/API), OpenGraph image (dynamic edge-rendered), metadataBase, twitter card
+5. **Error pages** — branded error.tsx and not-found.tsx
+6. **Database indexes** — 7 indexes on frequently queried columns
+7. **Credential cleanup** — removed hardcoded n8n API key from deploy script
+
+**Rationale:**
+- Security and SEO must be in place before any real customers use the site
+- Input validation prevents injection and abuse
+- HTML escaping prevents email-based XSS
+- Sitemap/robots/OG image are essential for search visibility and social sharing
+- Indexes prevent performance degradation as data grows
+
+**Files:**
+- `src/app/api/checkout/route.ts` — validation + DB failure handling
+- `src/app/api/contact/route.ts` — input validation
+- `src/app/api/wholesale-inquiry/route.ts` — input validation
+- `src/lib/email-templates.ts` — `escapeHtml()` utility
+- `src/app/sitemap.ts`, `src/app/robots.ts` — SEO
+- `src/app/opengraph-image.tsx` — OG image
+- `src/app/error.tsx`, `src/app/not-found.tsx` — error pages
+- `src/lib/db.ts` — indexes in `initDatabase()`
+- `src/app/layout.tsx` — metadataBase, twitter card

@@ -2,21 +2,44 @@
 
 **Project:** Ambar & Larimar Shop (formerly Atlantida Gems)
 **Last Updated:** 2026-03-09
-**Session:** 6
+**Session:** 7
 
 ---
 
 ## Current Focus
 
 **What I'm working on right now:**
-> Order management system complete. Full notification pipeline: customer email confirmation, owner email (with product images), WhatsApp notification via n8n + Meta Business API. Order tracking page for customers. Admin can manage orders, add tracking numbers, and trigger shipping notifications.
+> Phase 1 pre-launch hardening complete. Full site audit done. Security fixes, SEO, and error pages deployed. GitHub repo created. Ready for Phase 2 (LLC → Stripe → launch).
 
 **Why this matters:**
-> End-to-end order flow is built — from checkout → payment → notifications → shipping → tracking. Just needs LLC/EIN → Stripe activation to go live.
+> Site is now production-hardened: input validation, HTML escaping, DB failure handling, sitemap, robots.txt, OG image, error pages, DB indexes. Next step is LLC/EIN → Stripe activation → go live.
 
 ---
 
-## Completed This Session (Session 6)
+## Completed This Session (Session 7)
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Full site audit (tech debt + missing features) | Done | 40+ items identified across security, SEO, performance, features |
+| Fix checkout DB failure handling | Done | Checkout now fails with 500 if order can't save to DB |
+| Add input validation (checkout) | Done | Email regex, shipping field checks, cart item validation |
+| Add input validation (contact form) | Done | JSON parse error handling, type checks, length limits, email regex |
+| Add input validation (wholesale inquiry) | Done | Required fields, email validation, length limits |
+| HTML escaping in email templates | Done | `escapeHtml()` on all user data (names, emails, addresses, images, tracking) |
+| Add sitemap.xml | Done | Dynamic sitemap with static pages + DB product slugs |
+| Add robots.txt | Done | Blocks `/admin`, `/api/`, `/checkout/success` from crawlers |
+| Add error.tsx | Done | Branded error page with "Try Again" button |
+| Add not-found.tsx | Done | Branded 404 with "Back to Home" and "Browse Shop" links |
+| Add OG image | Done | Dynamic `opengraph-image.tsx` (1200x630, ocean gradient, brand name) |
+| Add metadataBase + twitter card | Done | `layout.tsx` updated with `metadataBase`, twitter card config, locale |
+| Add database indexes (7) | Done | products.slug, visible, category; orders.email, status, created_at, stripe_session |
+| Remove hardcoded n8n API key | Done | Deploy script now reads from `N8N_API_KEY` env var |
+| Initialize git repo | Done | `git init`, configured user, initial commit |
+| Install GitHub CLI | Done | `winget install GitHub.cli` |
+| Create GitHub repo + push | Done | https://github.com/accountmanager-1991/atlantidagems (public) |
+| Deploy to Vercel production | Done | https://ambarlarimarshop.vercel.app |
+
+## Completed Session 6
 
 | Task | Status | Notes |
 |------|--------|-------|
@@ -61,7 +84,7 @@
 | Fix upload button not triggering file picker | Done | Replaced hidden `<input>` in `<label>` with programmatic `document.createElement("input")` |
 | Add error alerts to upload flow | Done | Browser `alert()` shows exact Cloudinary error on failure |
 | Fix product images not showing on shop/detail pages | Done | ProductCard + ProductGallery now render real `imageMain` |
-| Add auto-revalidation on admin save | Done | PUT/POST/DELETE endpoints call `revalidatePath()` for `/shop`, `/api/products`, `/shop/[slug]`, `/` |
+| Add auto-revalidation on admin save | Done | PUT/POST/DELETE endpoints call `revalidatePath()` |
 | Add arrow navigation to product gallery | Done | Left/right arrows (hover), dot indicators, clickable thumbnails |
 | Add `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` to Vercel | Done | Was missing from production env vars |
 | Add multilingual AI descriptions (EN/ES/DE) | Done | One-click generation via Claude Haiku API |
@@ -95,30 +118,48 @@
 | Service | Status | Details |
 |---------|--------|---------|
 | Vercel (hosting) | Active | ambarlarimarshop.vercel.app |
-| Neon Postgres | Connected | DATABASE_URL set, products + orders tables |
+| GitHub | Active | github.com/accountmanager-1991/atlantidagems (public) |
+| Neon Postgres | Connected | DATABASE_URL set, products + orders tables, 7 indexes |
 | Cloudinary | Connected | Unsigned upload via REST API, cloud: `dlk6s7llm`, preset: `atlantida_unsigned` |
-| Admin Auth | Active | Cookie-based, password in env |
+| Admin Auth | Active | Cookie-based, password in env (needs security upgrade — see TD010) |
 | Anthropic API | Connected | Claude Haiku for AI descriptions (EN/ES/DE) |
 | Resend (email) | Not configured | Need RESEND_API_KEY for order notifications + contact forms |
 | Stripe | Code ready | Needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_BASE_URL` on Vercel |
 | WhatsApp Business Cloud | Configured | Meta App "Atlantida Order Notifications", system user `n8n-bot`, permanent token |
-| n8n (WhatsApp workflow) | Active | Workflow `zQ1QFgkwEpcP6YZW` on `emozca.app.n8n.cloud` |
+| n8n (WhatsApp workflow) | Deployed (not activated) | Workflow `zQ1QFgkwEpcP6YZW` — needs credential selection + activation in n8n UI |
 | Custom domain | Not configured | Need to add in Vercel |
 | LLC (Wyoming) | In progress | Northwest Registered Agent — Emozca LLC |
 
 ---
 
-## Next Up (Priority Order)
+## Next Up — Phase 2 (Launch Blockers)
 
 1. **Complete LLC formation** — Northwest Registered Agent (Emozca LLC, Wyoming)
 2. **Get EIN** — Fax Form SS-4 to IRS (or Northwest $50 add-on)
 3. **Activate Stripe** — Create account with LLC/EIN, add env vars to Vercel
-4. **Configure Resend** — `RESEND_API_KEY` for email notifications (customer + owner + shipping)
-5. **Activate n8n WhatsApp workflow** — Open workflow in n8n, select WhatsApp credential, activate
-6. **Test full order flow** — End-to-end: checkout → Stripe → DB → emails → WhatsApp → tracking
-7. **Add real products** — Upload photos, set prices, generate AI descriptions
-8. **Custom domain** — Point domain to Vercel
-9. **n8n social media automation** — Auto-post pipeline
+4. **Configure Resend** — Sign up at resend.com, add `RESEND_API_KEY` to Vercel
+5. **Set `NEXT_PUBLIC_BASE_URL`** — Set to real domain on Vercel
+6. **Custom domain** — Point domain to Vercel
+7. **Activate n8n WhatsApp workflow** — Open workflow in n8n, select WhatsApp credential, activate
+8. **Run `/api/admin/setup`** on production — Creates new DB indexes
+9. **Add Google Analytics / Vercel Analytics** — Track traffic + conversions
+10. **Test full order flow** — End-to-end: checkout → Stripe → DB → emails → WhatsApp → tracking
+
+## Next Up — Phase 3 (Growth Features)
+
+1. **JSON-LD structured data** — Product schema for Google rich snippets (`schema-dts` already installed)
+2. **Image optimization** — Cloudinary transforms (`f_auto,q_auto,w_800`) on product images
+3. **Inventory management** — Decrement stock on purchase
+4. **Admin session security** — Hashed session tokens instead of raw password in cookie (TD010)
+5. **Order access control** — Verify ownership before showing order details (TD011)
+6. **Rate limiting** — Vercel Edge Middleware on admin login + form endpoints (TD005)
+7. **Newsletter signup** — Email capture + GoHighLevel integration
+8. **n8n social media automation** — Auto-posting pipeline (2-3x/day)
+9. **Product search** — Search bar on shop page
+10. **Product reviews/testimonials** — Social proof for high-value items
+11. **Abandoned cart recovery** — Follow-up mechanism for incomplete checkouts
+12. **Remove dead code** — Google Sheets integration (TD006), Cloudinary SDK (TD007)
+13. **Add real products** — Upload photos, set prices, generate AI descriptions
 
 ---
 
@@ -129,12 +170,12 @@
 |------|---------|
 | `src/app/admin/page.tsx` | Admin page entry |
 | `src/components/admin/AdminDashboard.tsx` | Full CRUD admin UI (~700 lines), bilingual EN/ES |
-| `src/lib/db.ts` | Neon Postgres connection + schema (multilingual columns) |
+| `src/lib/db.ts` | Neon Postgres connection + schema + indexes |
 | `src/lib/admin-auth.ts` | Cookie-based auth |
 | `src/app/api/admin/auth/route.ts` | Login/logout API |
 | `src/app/api/admin/products/route.ts` | GET all / POST new product (with revalidation) |
 | `src/app/api/admin/products/[id]/route.ts` | PUT update / DELETE product (with revalidation) |
-| `src/app/api/admin/setup/route.ts` | Database initialization |
+| `src/app/api/admin/setup/route.ts` | Database initialization + indexes |
 | `src/app/api/admin/upload/route.ts` | Cloudinary unsigned upload via REST API |
 | `src/app/api/admin/generate/route.ts` | AI description generation (EN/ES/DE) |
 
@@ -149,7 +190,7 @@
 | File | Purpose |
 |------|---------|
 | `src/lib/stripe.ts` | Stripe config, lazy init, shipping constants |
-| `src/app/api/checkout/route.ts` | Creates Stripe Checkout sessions, saves orders to DB |
+| `src/app/api/checkout/route.ts` | Creates Stripe sessions, validates input, saves order (fails if DB fails) |
 | `src/app/api/webhook/stripe/route.ts` | Stripe webhook — parallel notifications (email + WhatsApp) |
 | `src/app/checkout/page.tsx` | Checkout page with shipping form + order summary |
 | `src/app/checkout/success/page.tsx` | Order confirmation with tracking link |
@@ -157,7 +198,7 @@
 ### Order Management & Notifications
 | File | Purpose |
 |------|---------|
-| `src/lib/email-templates.ts` | 3 branded HTML email templates (confirmation, owner, shipping) |
+| `src/lib/email-templates.ts` | 3 branded HTML email templates (with HTML escaping) |
 | `src/components/admin/OrdersManager.tsx` | Admin order management UI (~300 lines) |
 | `src/app/api/admin/orders/route.ts` | GET all orders (admin) |
 | `src/app/api/admin/orders/[id]/route.ts` | PUT update order (status, tracking, send shipping email) |
@@ -165,13 +206,22 @@
 | `src/app/order/[id]/page.tsx` | Customer order tracking page with progress bar |
 | `src/app/api/admin/preview-email/route.ts` | Email template preview with sample data |
 | `n8n-workflows/atlantida-order-notifications.json` | n8n workflow definition (Webhook → WhatsApp) |
-| `n8n-workflows/deploy-whatsapp-notifications.js` | Deploy script for n8n API |
+| `n8n-workflows/deploy-whatsapp-notifications.js` | Deploy script (reads N8N_API_KEY from env) |
+
+### SEO & Error Handling (Session 7)
+| File | Purpose |
+|------|---------|
+| `src/app/sitemap.ts` | Dynamic sitemap with static + product pages |
+| `src/app/robots.ts` | Blocks admin/API from crawlers |
+| `src/app/opengraph-image.tsx` | Dynamic 1200x630 branded OG image |
+| `src/app/error.tsx` | Branded error page with retry |
+| `src/app/not-found.tsx` | Branded 404 page |
 
 ### Product Data Flow
 | Priority | Source | Status |
 |----------|--------|--------|
 | 1st | Neon Postgres | Active — 1 product with image |
-| 2nd | Google Sheets | Fallback (not configured) |
+| 2nd | Google Sheets | Fallback (not configured, dead code — TD006) |
 | 3rd | Mock data | Safety net (8 placeholder products) |
 
 ---
@@ -192,11 +242,15 @@
 
 | Issue | Severity | Status | Notes |
 |-------|----------|--------|-------|
-| Mock data shows alongside real products | Low | By design | Falls back to mock when DB has 0 visible products |
-| Resend not configured | Medium | Pending | Order notification + contact forms won't send emails |
+| Admin stores raw password in cookie | High | TD010 | Needs hashed session tokens |
+| Order tracking has no access control | High | TD011 | Anyone with UUID can view any order |
+| No rate limiting on login/forms | Medium | TD005 | Brute-force and spam possible |
+| Resend not configured | Medium | Pending | Order + contact emails won't send |
 | No custom domain | Medium | Pending | Using Vercel subdomain |
+| Mock data shows alongside real products | Low | By design | Falls back to mock when DB has 0 visible products |
 | Featured Pieces empty on homepage | Low | Expected | No products have `featured=true` — toggle in admin |
 | Cart images stale if product added before image upload | Low | Known | Clear cart and re-add product to refresh |
+| No analytics | Medium | Pending | Can't measure traffic or ad ROI |
 
 ---
 
@@ -216,4 +270,4 @@
 
 ---
 
-*Last context save: 2026-03-09 — Session 6, Order management + notifications + WhatsApp + tracking complete.*
+*Last context save: 2026-03-09 — Session 7, Phase 1 hardening complete + GitHub repo + Vercel deploy.*

@@ -4,6 +4,33 @@ All notable changes to the Ambar & Larimar Shop project.
 
 ---
 
+## [0.7.0] - 2026-03-09 — Security Hardening, SEO & GitHub
+
+### Added
+- **Sitemap** (`sitemap.ts`) — dynamic sitemap with static pages + product slugs from DB
+- **Robots.txt** (`robots.ts`) — blocks `/admin`, `/api/`, `/checkout/success` from crawlers
+- **OpenGraph image** (`opengraph-image.tsx`) — dynamic 1200x630 branded image (ocean gradient, gold accents)
+- **Error page** (`error.tsx`) — branded error page with "Try Again" button
+- **404 page** (`not-found.tsx`) — branded not-found with "Back to Home" and "Browse Shop" links
+- **Database indexes** (7) — products.slug, visible, category; orders.email, status, created_at, stripe_session
+- **Twitter card metadata** — `summary_large_image` card in layout.tsx
+- **`metadataBase`** in layout — proper base URL for OG image resolution
+
+### Changed
+- **Checkout API** — now fails with 500 if DB order creation fails (was silently continuing)
+- **Checkout validation** — server-side email regex, shipping field checks, cart item validation
+- **Contact form** — JSON parse error handling, type checks, length limits, email regex
+- **Wholesale inquiry** — required field validation, email format check, length limits
+- **Email templates** — `escapeHtml()` on all user-provided data (XSS prevention)
+- **n8n deploy script** — removed hardcoded API key, reads from `N8N_API_KEY` env var
+
+### Infrastructure
+- Initialized git repo, pushed to GitHub: `github.com/accountmanager-1991/atlantidagems`
+- Installed GitHub CLI via winget
+- Deployed to Vercel production
+
+---
+
 ## [0.6.0] - 2026-03-09 — Order Management, Notifications & Tracking
 
 ### Added
