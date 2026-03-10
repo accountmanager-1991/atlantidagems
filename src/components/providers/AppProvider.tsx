@@ -18,8 +18,6 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     const savedLocale = localStorage.getItem("locale") as Locale | null;
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
@@ -31,7 +29,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTheme(savedTheme);
       document.documentElement.setAttribute("data-theme", savedTheme);
     }
-    setMounted(true);
   }, []);
 
   const setLocale = (l: Locale) => {
@@ -48,11 +45,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const t = getTranslations(locale);
-
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <AppContext.Provider value={{ locale, setLocale, t, theme, toggleTheme }}>
