@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { optimizeImage } from "@/lib/cloudinary";
 
 interface Props {
   images: string[];
@@ -32,7 +33,7 @@ export default function ProductGallery({ images, name, stonePlaceholder }: Props
       <div className="relative aspect-square bg-cream-dark rounded-sm overflow-hidden mb-4 group">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={images[selected]}
+          src={optimizeImage(images[selected], 800)}
           alt={name}
           className="w-full h-full object-cover"
         />
@@ -92,7 +93,7 @@ export default function ProductGallery({ images, name, stonePlaceholder }: Props
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img} alt={`${name} ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={optimizeImage(img, 200)} alt={`${name} ${i + 1}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

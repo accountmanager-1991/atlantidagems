@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 interface OrderItem {
@@ -54,20 +55,28 @@ export default function OrderTrackingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/orders/${id}`)
+    if (!token) {
+      setError("Access token required. Please use the link from your confirmation email.");
+      setLoading(false);
+      return;
+    }
+    fetch(`/api/orders/${id}?token=${encodeURIComponent(token)}`)
       .then((r) => {
+        if (r.status === 403) throw new Error("Invalid access token.");
         if (!r.ok) throw new Error("Order not found");
         return r.json();
       })
       .then(setOrder)
-      .catch(() => setError("Order not found. Please check your order ID."))
+      .catch((e) => setError(e.message || "Order not found. Please check your order ID."))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, token]);
 
   if (loading) {
     return (

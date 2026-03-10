@@ -9,6 +9,7 @@ function SuccessContent() {
   const { t } = useApp();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id") || "";
+  const accessToken = searchParams.get("token") || "";
 
   return (
     <div className="py-20 sm:py-28">
@@ -58,7 +59,7 @@ function SuccessContent() {
         <div className="space-y-3">
           {orderId && (
             <Link
-              href={`/order/${orderId}`}
+              href={`/order/${orderId}?token=${accessToken}`}
               className="block w-full bg-ocean hover:bg-ocean/90 text-cream py-4 font-ui text-sm tracking-[0.15em] uppercase transition-colors"
             >
               Track Your Order

@@ -19,6 +19,7 @@ interface OrderData {
   shippingAddress: string;
   items: OrderItem[];
   stripeSessionId: string;
+  accessToken?: string;
 }
 
 function escapeHtml(str: string): string {
@@ -167,7 +168,7 @@ export function customerConfirmationEmail(order: OrderData): string {
                 We'll send you a tracking number once your order ships.
               </p>
               <p style="margin: 12px 0 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app"}/order/${order.orderId}" style="color: ${BRAND_COLORS.larimar}; font-size: 14px;">
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app"}/order/${order.orderId}${order.accessToken ? `?token=${order.accessToken}` : ""}" style="color: ${BRAND_COLORS.larimar}; font-size: 14px;">
                   Track your order →
                 </a>
               </p>

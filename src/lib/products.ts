@@ -1,4 +1,3 @@
-import { getSheetData } from "./google-sheets";
 import type {
   Product,
   ProductCategory,
@@ -6,62 +5,6 @@ import type {
   MetalType,
   StockStatus,
 } from "@/types/product";
-
-// Column indices matching the Google Sheet structure
-const COL = {
-  id: 0, name: 1, slug: 2, description: 3, shortDescription: 4,
-  priceRetail: 5, priceWholesale: 6, minWholesaleQty: 7,
-  category: 8, stoneType: 9, metalType: 10,
-  imageMain: 11, image2: 12, image3: 13, image4: 14,
-  stockStatus: 15, featured: 16, wholesaleEligible: 17, newArrival: 18,
-  weightGrams: 19, dimensions: 20, stoneOrigin: 21,
-  visible: 22, sortOrder: 23, dateAdded: 24, seoTitle: 25, seoDescription: 26,
-};
-
-function parseBoolean(val: string | undefined): boolean {
-  return val?.toUpperCase() === "TRUE";
-}
-
-function parseNumber(val: string | undefined, fallback = 0): number {
-  const n = Number(val);
-  return isNaN(n) ? fallback : n;
-}
-
-function rowToProduct(row: string[]): Product {
-  return {
-    id: row[COL.id] || "",
-    name: row[COL.name] || "",
-    slug: row[COL.slug] || "",
-    description: row[COL.description] || "",
-    shortDescription: row[COL.shortDescription] || "",
-    descriptionEs: "",
-    shortDescriptionEs: "",
-    descriptionDe: "",
-    shortDescriptionDe: "",
-    priceRetail: parseNumber(row[COL.priceRetail]),
-    priceWholesale: parseNumber(row[COL.priceWholesale]),
-    minWholesaleQty: parseNumber(row[COL.minWholesaleQty], 1),
-    category: (row[COL.category] || "pendants") as ProductCategory,
-    stoneType: (row[COL.stoneType] || "larimar") as StoneType,
-    metalType: (row[COL.metalType] || "sterling-silver") as MetalType,
-    imageMain: row[COL.imageMain] || "",
-    image2: row[COL.image2] || "",
-    image3: row[COL.image3] || "",
-    image4: row[COL.image4] || "",
-    stockStatus: (row[COL.stockStatus] || "in-stock") as StockStatus,
-    featured: parseBoolean(row[COL.featured]),
-    wholesaleEligible: parseBoolean(row[COL.wholesaleEligible]),
-    newArrival: parseBoolean(row[COL.newArrival]),
-    weightGrams: parseNumber(row[COL.weightGrams]),
-    dimensions: row[COL.dimensions] || "",
-    stoneOrigin: row[COL.stoneOrigin] || "Dominican Republic",
-    visible: row[COL.visible] !== undefined ? parseBoolean(row[COL.visible]) : true,
-    sortOrder: parseNumber(row[COL.sortOrder], 999),
-    dateAdded: row[COL.dateAdded] || "",
-    seoTitle: row[COL.seoTitle] || "",
-    seoDescription: row[COL.seoDescription] || "",
-  };
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbRowToProduct(row: any): Product {
@@ -113,7 +56,7 @@ async function getProductsFromNeon(): Promise<Product[] | null> {
   }
 }
 
-// Mock data for development
+// Mock data for development/fallback when DB is unavailable
 function getMockProducts(): Product[] {
   return [
     { id: "LAR-PEN-001", name: "Ocean Wave Larimar Pendant", slug: "ocean-wave-larimar-pendant", description: "A stunning sterling silver pendant featuring a premium AAA-grade Larimar stone, hand-selected from the mountains of Barahona, Dominican Republic.", shortDescription: "Premium Larimar pendant in sterling silver, handcrafted in the Dominican Republic.", priceRetail: 165, priceWholesale: 72, minWholesaleQty: 10, category: "pendants", stoneType: "larimar", metalType: "sterling-silver", imageMain: "/images/placeholder.jpg", image2: "", image3: "", image4: "", stockStatus: "in-stock", featured: true, wholesaleEligible: true, newArrival: true, weightGrams: 8, dimensions: "2.5cm x 1.8cm", stoneOrigin: "Barahona, Dominican Republic", visible: true, sortOrder: 1, dateAdded: "2026-03-09", descriptionEs: "", shortDescriptionEs: "", descriptionDe: "", shortDescriptionDe: "", seoTitle: "", seoDescription: "" },
@@ -131,12 +74,6 @@ export async function getAllProducts(): Promise<Product[]> {
   // Try Neon Postgres first
   const neonProducts = await getProductsFromNeon();
   if (neonProducts) return neonProducts;
-
-  // Then try Google Sheets
-  const data = await getSheetData("products!A2:AA");
-  if (data) {
-    return data.map(rowToProduct).filter((p) => p.visible && p.id).sort((a, b) => a.sortOrder - b.sortOrder);
-  }
 
   // Fallback to mock data
   return getMockProducts();

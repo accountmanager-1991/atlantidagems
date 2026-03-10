@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { generateSessionToken } from "@/lib/admin-auth";
 
 export async function POST(request: NextRequest) {
   const { password } = await request.json();
@@ -13,8 +14,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
 
+  const token = generateSessionToken(adminPassword);
+
   const cookieStore = await cookies();
-  cookieStore.set("admin_session", adminPassword, {
+  cookieStore.set("admin_session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",

@@ -73,10 +73,14 @@ export async function initDatabase() {
       tracking_carrier TEXT DEFAULT '',
       shipped_at TIMESTAMPTZ,
       notes TEXT DEFAULT '',
+      access_token TEXT DEFAULT '',
       paid_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+
+  // Safe migration for access_token column on existing orders table
+  try { await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS access_token TEXT DEFAULT ''`; } catch { /* exists */ }
 
   // Safe migration for tracking columns on existing orders table
   try { await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT DEFAULT ''`; } catch { /* exists */ }

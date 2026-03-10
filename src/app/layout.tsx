@@ -4,6 +4,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AppProvider } from "@/components/providers/AppProvider";
 import { BRAND } from "@/lib/constants";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -66,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -87,6 +89,8 @@ export default function RootLayout({
           <main className="min-h-screen">{children}</main>
           <Footer />
         </AppProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

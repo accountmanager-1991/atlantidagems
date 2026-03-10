@@ -1,4 +1,4 @@
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "ambarlarimarshop";
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dlk6s7llm";
 
 export function cloudinaryLoader({
   src,
@@ -35,4 +35,15 @@ export function getImageUrl(publicIdOrUrl: string, width = 800): string {
   }
 
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_${width},q_auto,f_auto/${publicIdOrUrl}`;
+}
+
+/**
+ * Add Cloudinary optimizations to an existing Cloudinary URL.
+ * If the URL is not from Cloudinary, returns it unchanged.
+ */
+export function optimizeImage(url: string, width = 800): string {
+  if (!url || !url.includes("res.cloudinary.com")) return url;
+  const parts = url.split("/upload/");
+  if (parts.length !== 2) return url;
+  return `${parts[0]}/upload/c_limit,w_${width},q_auto,f_auto/${parts[1]}`;
 }

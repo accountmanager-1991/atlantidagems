@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe, calculateShipping } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
+import { randomBytes } from "crypto";
 
 interface CheckoutItem {
   id: string;
@@ -92,13 +93,15 @@ export async function POST(request: NextRequest) {
 
     // Save order to database — must succeed before creating Stripe session
     let orderId: string;
+    let accessToken: string;
     try {
       const sql = getDb();
+      accessToken = randomBytes(16).toString("hex");
       const result = await sql`
         INSERT INTO orders (
           customer_email, customer_name, customer_phone,
           shipping_address, shipping_city, shipping_state, shipping_zip, shipping_country,
-          items_json, subtotal, shipping_cost, total, status
+          items_json, subtotal, shipping_cost, total, status, access_token
         ) VALUES (
           ${shipping.email},
           ${shipping.firstName + " " + shipping.lastName},
@@ -112,7 +115,8 @@ export async function POST(request: NextRequest) {
           ${subtotal},
           ${shippingCost},
           ${subtotal + shippingCost},
-          'pending'
+          'pending',
+          ${accessToken}
         )
         RETURNING id
       `;
@@ -138,11 +142,11 @@ export async function POST(request: NextRequest) {
         customerPhone: shipping.phone,
         shippingAddress: `${shipping.address}, ${shipping.city}, ${shipping.state} ${shipping.zip}, ${shipping.country}`,
       },
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app"}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app"}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}&token=${accessToken}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app"}/checkout`,
     });
 
-    return NextResponse.json({ url: session.url, orderId });
+    return NextResponse.json({ url: session.url, orderId, accessToken });
   } catch (error) {
     console.error("Checkout error:", error);
     const message = error instanceof Error ? error.message : "Checkout failed";

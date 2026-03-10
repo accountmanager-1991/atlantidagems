@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const token = request.nextUrl.searchParams.get("token");
+
+  if (!token) {
+    return NextResponse.json({ error: "Access token required" }, { status: 401 });
+  }
 
   try {
     const sql = getDb();
@@ -13,7 +18,7 @@ export async function GET(
       SELECT
         id, customer_name, status, tracking_number, tracking_carrier,
         items_json, subtotal, shipping_cost, total,
-        shipped_at, paid_at, created_at
+        shipped_at, paid_at, created_at, access_token
       FROM orders
       WHERE id = ${id}
     `;
@@ -23,6 +28,12 @@ export async function GET(
     }
 
     const order = rows[0];
+
+    // Verify access token (also allow legacy orders without tokens)
+    if (order.access_token && order.access_token !== token) {
+      return NextResponse.json({ error: "Invalid access token" }, { status: 403 });
+    }
+
     return NextResponse.json({
       id: order.id,
       customerName: order.customer_name,

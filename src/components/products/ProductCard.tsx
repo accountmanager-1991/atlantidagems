@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/utils";
 import { STONE_LABELS, METAL_LABELS } from "@/lib/constants";
 import type { Product } from "@/types/product";
 import { useCartStore } from "@/lib/cart-store";
+import { optimizeImage } from "@/lib/cloudinary";
 
 interface ProductCardProps {
   product: Product;
@@ -44,7 +45,7 @@ export default function ProductCard({
           {product.imageMain && product.imageMain !== "/images/placeholder.jpg" ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
-              src={product.imageMain}
+              src={optimizeImage(product.imageMain, 400)}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
             />

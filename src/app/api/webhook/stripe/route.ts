@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     let items: OrderItem[] = [];
     let subtotal = "0.00";
     let shippingCost = "0.00";
+    let accessToken = "";
 
     if (orderId) {
       try {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
 
         // Fetch order details for emails
         const orderRows = await sql`
-          SELECT items_json, subtotal, shipping_cost FROM orders WHERE id = ${orderId}
+          SELECT items_json, subtotal, shipping_cost, access_token FROM orders WHERE id = ${orderId}
         `;
         if (orderRows[0]) {
           items = JSON.parse(orderRows[0].items_json || "[]");
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
           shippingCost = parseFloat(
             orderRows[0].shipping_cost || "0"
           ).toFixed(2);
+          accessToken = orderRows[0].access_token || "";
         }
       } catch (dbError) {
         console.error("Failed to update/fetch order:", dbError);
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       items,
       stripeSessionId: session.id,
+      accessToken,
     };
 
     // Send emails and notifications in parallel

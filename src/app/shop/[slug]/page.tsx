@@ -48,8 +48,39 @@ export default async function ProductPage({ params }: Props) {
     product.image4,
   ].filter(Boolean);
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.vercel.app";
+  const stockMap: Record<string, string> = {
+    "in-stock": "https://schema.org/InStock",
+    "low-stock": "https://schema.org/LimitedAvailability",
+    "sold-out": "https://schema.org/OutOfStock",
+  };
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription || product.description,
+    image: images,
+    url: `${baseUrl}/shop/${slug}`,
+    brand: { "@type": "Brand", name: BRAND.name },
+    material: METAL_LABELS[product.metalType],
+    ...(product.weightGrams > 0 && { weight: { "@type": "QuantitativeValue", value: product.weightGrams, unitCode: "GRM" } }),
+    offers: {
+      "@type": "Offer",
+      price: product.priceRetail,
+      priceCurrency: "USD",
+      availability: stockMap[product.stockStatus] || "https://schema.org/InStock",
+      seller: { "@type": "Organization", name: BRAND.name },
+      url: `${baseUrl}/shop/${slug}`,
+    },
+  };
+
   return (
     <div className="py-12 sm:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-8 font-ui text-sm text-ocean/50">
