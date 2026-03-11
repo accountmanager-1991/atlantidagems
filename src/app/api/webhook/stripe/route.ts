@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
-import { Resend } from "resend";
-import {
-  customerConfirmationEmail,
-  ownerOrderNotificationEmail,
-} from "@/lib/email-templates";
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+import { sendOrderConfirmationGHL } from "@/lib/ghl";
 
 interface OrderItem {
   id: string;
@@ -102,48 +94,15 @@ export async function POST(request: NextRequest) {
       accessToken,
     };
 
-    // Send emails and notifications in parallel
+    // Send notifications in parallel
     const promises: Promise<void>[] = [];
 
-    // 1. Customer confirmation email
-    if (resend && customerEmail) {
-      promises.push(
-        resend.emails
-          .send({
-            from: "Ambar & Larimar Shop <orders@ambarlarimarshop.com>",
-            to: customerEmail,
-            subject: `Order Confirmed — #${orderId.slice(0, 8).toUpperCase()}`,
-            html: customerConfirmationEmail(orderData),
-          })
-          .then(() => {
-            console.log(`Customer confirmation sent to ${customerEmail}`);
-          })
-          .catch((err) => {
-            console.error("Failed to send customer email:", err);
-          })
-      );
-    }
+    // 1. GHL — create/update contact + trigger order confirmation email workflow
+    promises.push(
+      sendOrderConfirmationGHL(orderData)
+    );
 
-    // 2. Owner notification email (with product images)
-    if (resend) {
-      promises.push(
-        resend.emails
-          .send({
-            from: "Ambar & Larimar Shop <orders@ambarlarimarshop.com>",
-            to: "sales@ambarlarimarshop.com",
-            subject: `New Order! $${amount} from ${customerName}`,
-            html: ownerOrderNotificationEmail(orderData),
-          })
-          .then(() => {
-            console.log("Owner notification sent");
-          })
-          .catch((err) => {
-            console.error("Failed to send owner email:", err);
-          })
-      );
-    }
-
-    // 3. n8n webhook for WhatsApp notification
+    // 2. n8n webhook for WhatsApp notification
     if (process.env.N8N_ORDER_WEBHOOK_URL) {
       promises.push(
         fetch(process.env.N8N_ORDER_WEBHOOK_URL, {

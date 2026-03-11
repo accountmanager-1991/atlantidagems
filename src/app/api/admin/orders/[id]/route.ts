@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { isAdmin } from "@/lib/admin-auth";
-import { Resend } from "resend";
-import { shippingConfirmationEmail } from "@/lib/email-templates";
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+import { sendShippingConfirmationGHL } from "@/lib/ghl";
 
 export async function PUT(
   request: NextRequest,
@@ -39,8 +34,8 @@ export async function PUT(
       WHERE id = ${id}
     `;
 
-    // Send shipping confirmation email if tracking number was added
-    if (send_shipping_email && tracking_number && resend) {
+    // Send shipping confirmation if tracking number was added
+    if (send_shipping_email && tracking_number) {
       const orderRows = await sql`
         SELECT * FROM orders WHERE id = ${id}
       `;
@@ -48,23 +43,15 @@ export async function PUT(
       if (order) {
         const items = JSON.parse(order.items_json || "[]");
 
-        // Email to customer
-        await resend.emails
-          .send({
-            from: "Ambar & Larimar Shop <orders@ambarlarimarshop.com>",
-            to: order.customer_email,
-            subject: `Your Order Has Shipped! Tracking: ${tracking_number}`,
-            html: shippingConfirmationEmail({
-              orderId: id,
-              customerName: order.customer_name,
-              trackingNumber: tracking_number,
-              trackingCarrier: tracking_carrier || "",
-              items,
-            }),
-          })
-          .catch((err: unknown) => {
-            console.error("Failed to send shipping email:", err);
-          });
+        // GHL shipping confirmation workflow
+        await sendShippingConfirmationGHL({
+          orderId: id,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          trackingNumber: tracking_number,
+          trackingCarrier: tracking_carrier || "",
+          items,
+        });
 
         // n8n webhook for WhatsApp shipping notification
         if (process.env.N8N_ORDER_WEBHOOK_URL) {
