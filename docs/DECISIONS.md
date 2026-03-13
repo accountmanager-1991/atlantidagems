@@ -1,7 +1,66 @@
 # Architecture & Design Decisions
 
 **Project:** Ambar & Larimar Shop
-**Last Updated:** 2026-03-09 (Session 6)
+**Last Updated:** 2026-03-12 (Session 13)
+
+---
+
+## D019: Session 13 Security Hardening — Rate Limiting, Headers, GHL Migration
+
+**Date:** 2026-03-12
+**Status:** Implemented
+
+**Context:** Full security audit before accepting real orders. Identified 3 critical issues: no rate limiting, revalidate auth bypass, no security headers. Also identified Resend as dead code.
+
+**Decision:** Fix all 3 critical issues + remove Resend + add security headers.
+
+**Changes:**
+1. **Rate limiting** — `src/lib/rate-limit.ts` (in-memory Map, per-IP, auto-cleanup) on admin login, contact form, wholesale form (5 attempts / 15 minutes)
+2. **Revalidate auth bypass** — added null check for `REVALIDATE_SECRET` in `/api/revalidate`
+3. **Security headers** — `next.config.ts` adds X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+4. **Resend removed** — `npm uninstall resend`, contact + wholesale routes rewritten to use GHL upsert API
+5. **Pinterest domain verification** — `p:domain_verify` meta tag in layout.tsx
+
+**Rate limiter design:**
+- In-memory Map (not Redis) — suitable for Vercel serverless cold starts
+- Auto-cleanup: entries expire after window passes
+- Returns `{ success, remaining, resetIn }` for informative error responses
+- Admin login shows remaining attempts on failure, returns 429 with Retry-After header when exhausted
+
+---
+
+## D018: Subscription Box — Pricing Strategy & Plan Structure
+
+**Date:** 2026-03-11
+**Status:** Analysis Complete — Pending Implementation
+
+**Context:** Owner wants to add a monthly jewelry subscription box (Larimar + Amber) alongside the existing retail shop.
+
+**Decision:** 4-tier subscription model. Launch with Plans A, C, D. Add Plan B in Month 2+.
+
+| Plan | Name | Price | Contents | Est. COGS | Margin |
+|------|------|-------|----------|-----------|--------|
+| A | Larimar Silver | $69/mo | 2 pcs: silver + larimar | $38–48 | 30–45% |
+| B | Amber Silver | $69/mo | 2 pcs: silver + amber | $35–45 | 35–49% |
+| C | Island Mix ★ | $89/mo | 3 pcs: larimar + amber silver | $52–68 | 24–42% |
+| D | Gold Edition | $119/mo | 3 pcs: gold/plated, premium | $65–95 | 20–45% |
+
+**Revenue target:** 3,000 subscribers across USA, Canada, Germany → ~$99K–$102K gross profit/month.
+
+**Competitive moat:** Only authentic Larimar + DR Blue Amber subscription box in the world. No direct competitor.
+
+**Key risks to resolve before building:**
+1. Standardize labor cost per tier (range is $5–$30/piece — must lock this before pricing)
+2. US fulfillment center (ShipBob/Pirateship) to cut shipping from ~$18 to ~$8/box
+3. Churn mitigation — need social automation live before launch (6–9% monthly churn expected)
+
+**Target customers:**
+- Primary: Women 32–52, $75K–$160K HH income, "Rare Collector" — wants unique pieces with origin story
+- Secondary: Gift buyers (men 30–55) for Mother's Day, Valentine's, anniversaries
+- Germany: Premium positioning, price in EUR (€69/€89/€119), origin-story-first messaging
+
+**Reference docs:** `Ambar-Larimar-Subscription-Market-Analysis.docx`, `Ambar-Larimar-Analisis-de-Mercado-ES.docx`
+**Generation scripts:** `scripts/generate-market-analysis.mjs`, `scripts/generate-market-analysis-es.mjs`
 
 ---
 

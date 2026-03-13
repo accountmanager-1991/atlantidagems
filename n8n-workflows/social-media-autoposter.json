@@ -1,0 +1,388 @@
+{
+  "name": "Ambar & Larimar — Social Media Auto-Poster",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 12,17,0 * * *" }]
+        }
+      },
+      "id": "sm-0001",
+      "name": "Schedule — 3x Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 300]
+    },
+
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "operation": "list",
+        "driveId": { "__rl": true, "value": "My Drive", "mode": "list" },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $vars.GDRIVE_TO_POST_FOLDER_ID }}",
+          "mode": "id"
+        },
+        "returnAll": false,
+        "limit": 1,
+        "filter": { "whatToList": "filesInFolder" },
+        "options": { "fields": "files(id,name,mimeType)" }
+      },
+      "id": "sm-0002",
+      "name": "Drive — List Queue",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [240, 300],
+      "onError": "continueErrorOutput",
+      "credentials": { "googleDriveOAuth2Api": { "id": "GDRIVE_CRED_ID", "name": "Google Drive" } }
+    },
+
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-files",
+              "leftValue": "={{ $json.files ? $json.files.length : 0 }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sm-0003",
+      "name": "IF — Files in Queue?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [480, 300],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {},
+      "id": "sm-0004",
+      "name": "No Files — Stop",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [480, 500]
+    },
+
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "f1", "name": "fileId",   "value": "={{ $json.files[0].id }}",       "type": "string" },
+            { "id": "f2", "name": "fileName",  "value": "={{ $json.files[0].name }}",     "type": "string" },
+            { "id": "f3", "name": "mimeType",  "value": "={{ $json.files[0].mimeType }}", "type": "string" }
+          ]
+        }
+      },
+      "id": "sm-0005",
+      "name": "Set — File Details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 300]
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Parse filename prefix to determine content type and smart link\nconst item = items[0].json;\nconst fileName = item.fileName || '';\nconst mimeType = item.mimeType || '';\n\nlet contentType = 'shop';\nlet smartLink = 'https://ambarlarimarshop.com/shop';\n\nconst lower = fileName.toLowerCase();\nif (lower.startsWith('wholesale_')) {\n  contentType = 'wholesale';\n  smartLink = 'https://ambarlarimarshop.com/wholesale';\n} else if (lower.startsWith('sub_')) {\n  contentType = 'subscription';\n  smartLink = 'https://ambarlarimarshop.com/subscribe';\n}\n\nconst isVideo = mimeType.startsWith('video/');\nconst resourceType = isVideo ? 'video' : 'image';\n\nconst cleanName = fileName\n  .replace(/^(shop_|wholesale_|sub_)/i, '')\n  .replace(/\\.[^.]+$/, '')\n  .replace(/[-_]/g, ' ')\n  .trim();\n\nreturn [{\n  json: {\n    fileId: item.fileId,\n    fileName: item.fileName,\n    mimeType: item.mimeType,\n    contentType,\n    smartLink,\n    isVideo,\n    resourceType,\n    cleanName\n  }\n}];"
+      },
+      "id": "sm-0006",
+      "name": "Code — Parse Filename",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.fileId }}",
+          "mode": "id"
+        }
+      },
+      "id": "sm-0007",
+      "name": "Drive — Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1200, 300],
+      "onError": "continueErrorOutput",
+      "credentials": { "googleDriveOAuth2Api": { "id": "GDRIVE_CRED_ID", "name": "Google Drive" } }
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudinary.com/v1_1/dlk6s7llm/{{ $('Code — Parse Filename').first().json.resourceType }}/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "file",          "value": "={{ $binary.data }}", "parameterType": "formBinaryData" },
+            { "name": "upload_preset", "value": "atlantida_unsigned" },
+            { "name": "folder",        "value": "social-posts" }
+          ]
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0008",
+      "name": "Cloudinary — Upload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1440, 300],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key",        "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type",      "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "model": "claude-haiku-4-5-20251001",
+          "max_tokens": 600,
+          "messages": [
+            {
+              "role": "user",
+              "content": "=You are a social media expert for Ambar & Larimar Shop — a luxury fine jewelry brand from the Dominican Republic. We sell authentic Larimar (a rare blue stone found ONLY in one mountain in the DR) and Dominican Blue Amber set in sterling silver and gold.\n\nCreate an Instagram/TikTok caption for a {{ $('Code — Parse Filename').first().json.contentType }} post about: {{ $('Code — Parse Filename').first().json.cleanName }}\n\nRequirements:\n- First line = scroll-stopping hook (no hashtags on first line)\n- 2-3 short punchy lines about rarity/story/craftsmanship\n- Tone: luxury, authentic, aspirational\n- CTA pointing to: {{ $('Code — Parse Filename').first().json.smartLink }}\n- 25 targeted hashtags for jewelry, larimar, caribbean, rare gems\n- 3-5 tasteful emojis max\n\nReturn ONLY the caption text ready to post."
+            }
+          ]
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0009",
+      "name": "Claude — Generate Caption",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1680, 300],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "jsCode": "// Assemble final post data from upstream nodes\nconst claudeJson   = items[0].json;\nconst caption      = claudeJson.content && claudeJson.content[0] ? claudeJson.content[0].text.trim() : '';\nconst cloudinary   = $node['Cloudinary — Upload'].first().json;\nconst parsed       = $node['Code — Parse Filename'].first().json;\nconst fileDetails  = $node['Set — File Details'].first().json;\n\nreturn [{\n  json: {\n    caption,\n    mediaUrl:    cloudinary.secure_url,\n    contentType: parsed.contentType,\n    smartLink:   parsed.smartLink,\n    isVideo:     parsed.isVideo,\n    fileId:      fileDetails.fileId,\n    mediaType:   parsed.isVideo ? 'VIDEO' : 'IMAGE'\n  }\n}];"
+      },
+      "id": "sm-0010",
+      "name": "Code — Format Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1920, 300]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $vars.INSTAGRAM_USER_ID }}/media",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "image_url":    "={{ $json.mediaUrl }}",
+          "caption":      "={{ $json.caption }}",
+          "access_token": "={{ $vars.META_PAGE_ACCESS_TOKEN }}"
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0011",
+      "name": "Instagram — Create Container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2160, 120],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": { "amount": 8, "unit": "seconds" },
+      "id": "sm-0012",
+      "name": "Wait — IG Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2400, 120]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $vars.INSTAGRAM_USER_ID }}/media_publish",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "creation_id":  "={{ $('Instagram — Create Container').first().json.id }}",
+          "access_token": "={{ $vars.META_PAGE_ACCESS_TOKEN }}"
+        },
+        "options": {}
+      },
+      "id": "sm-0013",
+      "name": "Instagram — Publish",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2640, 120],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $vars.FACEBOOK_PAGE_ID }}/photos",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "url":          "={{ $('Code — Format Post').first().json.mediaUrl }}",
+          "message":      "={{ $('Code — Format Post').first().json.caption }}",
+          "access_token": "={{ $vars.META_PAGE_ACCESS_TOKEN }}"
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0014",
+      "name": "Facebook — Post Photo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2160, 320],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.tiktokapis.com/v2/post/publish/content/init/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.TIKTOK_ACCESS_TOKEN }}" },
+            { "name": "content-type",  "value": "application/json; charset=UTF-8" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "post_info": {
+            "title":         "={{ $('Code — Format Post').first().json.caption.substring(0, 150) }}",
+            "privacy_level": "PUBLIC_TO_EVERYONE",
+            "disable_duet":    false,
+            "disable_comment": false,
+            "disable_stitch":  false
+          },
+          "source_info": {
+            "source":    "PULL_FROM_URL",
+            "video_url": "={{ $('Code — Format Post').first().json.mediaUrl }}",
+            "photo_images": ["={{ $('Code — Format Post').first().json.mediaUrl }}"],
+            "photo_cover_index": 0
+          },
+          "media_type": "={{ $('Code — Format Post').first().json.mediaType }}"
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0015",
+      "name": "TikTok — Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2160, 520],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinterest.com/v5/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.PINTEREST_ACCESS_TOKEN }}" },
+            { "name": "content-type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "board_id":    "={{ $vars.PINTEREST_BOARD_ID }}",
+          "title":       "={{ $('Code — Format Post').first().json.caption.split('\\n')[0].substring(0, 100) }}",
+          "description": "={{ $('Code — Format Post').first().json.caption.substring(0, 500) }}",
+          "link":        "={{ $('Code — Format Post').first().json.smartLink }}",
+          "media_source": {
+            "source_type": "image_url",
+            "url": "={{ $('Code — Format Post').first().json.mediaUrl }}"
+          }
+        },
+        "options": { "retryOnFail": true, "maxTries": 2 }
+      },
+      "id": "sm-0016",
+      "name": "Pinterest — Create Pin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2160, 720],
+      "onError": "continueErrorOutput"
+    },
+
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Code — Format Post').first().json.fileId }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $vars.GDRIVE_POSTED_FOLDER_ID }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "sm-0017",
+      "name": "Drive — Move to Posted",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2880, 420],
+      "credentials": { "googleDriveOAuth2Api": { "id": "GDRIVE_CRED_ID", "name": "Google Drive" } }
+    }
+  ],
+
+  "connections": {
+    "Schedule — 3x Daily":         { "main": [[{ "node": "Drive — List Queue",           "type": "main", "index": 0 }]] },
+    "Drive — List Queue":           { "main": [[{ "node": "IF — Files in Queue?",         "type": "main", "index": 0 }]] },
+    "IF — Files in Queue?":         { "main": [
+      [{ "node": "Set — File Details",  "type": "main", "index": 0 }],
+      [{ "node": "No Files — Stop",     "type": "main", "index": 0 }]
+    ]},
+    "Set — File Details":           { "main": [[{ "node": "Code — Parse Filename",        "type": "main", "index": 0 }]] },
+    "Code — Parse Filename":        { "main": [[{ "node": "Drive — Download File",        "type": "main", "index": 0 }]] },
+    "Drive — Download File":        { "main": [[{ "node": "Cloudinary — Upload",          "type": "main", "index": 0 }]] },
+    "Cloudinary — Upload":          { "main": [[{ "node": "Claude — Generate Caption",    "type": "main", "index": 0 }]] },
+    "Claude — Generate Caption":    { "main": [[{ "node": "Code — Format Post",           "type": "main", "index": 0 }]] },
+    "Code — Format Post":           { "main": [[
+      { "node": "Instagram — Create Container", "type": "main", "index": 0 },
+      { "node": "Facebook — Post Photo",        "type": "main", "index": 0 },
+      { "node": "TikTok — Post",                "type": "main", "index": 0 },
+      { "node": "Pinterest — Create Pin",       "type": "main", "index": 0 }
+    ]]},
+    "Instagram — Create Container": { "main": [[{ "node": "Wait — IG Processing",         "type": "main", "index": 0 }]] },
+    "Wait — IG Processing":         { "main": [[{ "node": "Instagram — Publish",          "type": "main", "index": 0 }]] },
+    "Instagram — Publish":          { "main": [[{ "node": "Drive — Move to Posted",       "type": "main", "index": 0 }]] },
+    "Facebook — Post Photo":        { "main": [[{ "node": "Drive — Move to Posted",       "type": "main", "index": 0 }]] },
+    "TikTok — Post":                { "main": [[{ "node": "Drive — Move to Posted",       "type": "main", "index": 0 }]] },
+    "Pinterest — Create Pin":       { "main": [[{ "node": "Drive — Move to Posted",       "type": "main", "index": 0 }]] }
+  },
+
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true
+  }
+}

@@ -1,18 +1,15 @@
 # Technical Debt Tracker
 
 **Project:** Ambar & Larimar Shop
-**Last Updated:** 2026-03-09 (Session 7)
+**Last Updated:** 2026-03-12 (Session 13)
 
 ---
 
 ## Active Tech Debt
 
-### TD001: No email delivery (Resend not configured)
-
-**Severity:** High
-**Impact:** All emails are dead — customer order confirmations, owner notifications, shipping confirmations, contact form, wholesale inquiries. Nothing sends.
-**Fix:** Sign up at resend.com, add `RESEND_API_KEY` to `.env.local` and Vercel.
-**Files:** `src/app/api/contact/route.ts`, `src/app/api/wholesale-inquiry/route.ts`, `src/app/api/webhook/stripe/route.ts`, `src/app/api/admin/orders/[id]/route.ts`
+### ~~TD001: No email delivery (Resend not configured)~~ — RESOLVED 2026-03-12
+**Was:** Resend not configured, no emails sending.
+**Fix:** Replaced Resend with GoHighLevel (GHL) contact upserts. Contact form uses "contact-form" tag, wholesale uses "wholesale-inquiry" tag. `resend` package removed.
 
 ---
 
@@ -25,13 +22,6 @@
 
 ---
 
-### TD003: No image optimization pipeline
-
-**Severity:** Medium
-**Impact:** Cloudinary images are served as-uploaded. No automatic resizing/WebP conversion. Cart uses raw `<img>` instead of Next.js `<Image>`.
-**Fix:** Add Cloudinary transformation parameters to image URLs (e.g., `c_limit,w_800,f_auto,q_auto`). Switch cart/checkout to use `<Image>` component.
-**Files:** `src/components/products/ProductCard.tsx`, `src/components/products/ProductGallery.tsx`, `src/components/cart/CartDrawer.tsx`, `src/app/cart/page.tsx`
-
 ---
 
 ### TD004: Admin panel has no CSRF protection
@@ -43,30 +33,11 @@
 
 ---
 
-### TD005: No rate limiting on admin login or forms
-
-**Severity:** Medium
-**Impact:** Brute-force possible on admin password endpoint. Contact/wholesale forms can be spammed.
-**Fix:** Add rate limiting via Vercel Edge Middleware or a simple in-memory counter.
-**Files:** `src/app/api/admin/auth/route.ts`, `src/app/api/contact/route.ts`, `src/app/api/wholesale-inquiry/route.ts`
+### ~~TD005: No rate limiting on admin login or forms~~ — RESOLVED 2026-03-12
+**Was:** Brute-force possible on admin login, forms could be spammed.
+**Fix:** Added `src/lib/rate-limit.ts` — in-memory per-IP rate limiter (5 attempts/15min). Applied to admin login (429 + Retry-After), contact form, wholesale form.
 
 ---
-
-### TD006: Google Sheets fallback code still present
-
-**Severity:** Low
-**Impact:** Dead code — Google Sheets credentials are not configured and likely won't be. `googleapis` npm package adds unnecessary bundle size.
-**Fix:** Remove `src/lib/google-sheets.ts`, remove `googleapis` from package.json, update `src/lib/products.ts` to remove getSheetData import.
-**Files:** `src/lib/google-sheets.ts`, `src/lib/products.ts`, `package.json`
-
----
-
-### TD007: Unused Cloudinary SDK dependency
-
-**Severity:** Low
-**Impact:** `cloudinary` npm package is still installed but no longer used (switched to REST API).
-**Fix:** Run `npm uninstall cloudinary` to remove unused dependency.
-**Files:** `package.json`
 
 ---
 
@@ -87,22 +58,6 @@
 **Files:** `.env.local`, `src/app/api/admin/upload/route.ts`
 
 ---
-
-### TD010: Admin session stores raw password in cookie
-
-**Severity:** High
-**Impact:** `admin-auth.ts` sets the actual `ADMIN_PASSWORD` as the cookie value. If cookie is stolen, attacker gets full admin access without needing the password again.
-**Fix:** Generate a cryptographic session token (e.g., `crypto.randomUUID()`), store it server-side or in a signed cookie, and compare tokens instead of passwords.
-**Files:** `src/lib/admin-auth.ts`, `src/app/api/admin/auth/route.ts`
-
----
-
-### TD011: Order tracking has no access control
-
-**Severity:** High
-**Impact:** `/api/orders/[id]` and `/order/[id]` are public. Anyone who guesses/brute-forces a UUID can see order details (name, address, items). UUIDs are hard to guess but not a security mechanism.
-**Fix:** Add an order-specific access token (sent in confirmation email) or require email verification before showing order details.
-**Files:** `src/app/api/orders/[id]/route.ts`, `src/app/order/[id]/page.tsx`, `src/lib/db.ts` (add `access_token` column)
 
 ---
 
@@ -133,25 +88,51 @@
 
 ---
 
-### TD015: No analytics
-
-**Severity:** Medium
-**Impact:** Can't measure traffic, conversions, or ad ROI. Essential for the $50/mo ad budget strategy.
-**Fix:** Add Vercel Analytics (`@vercel/analytics`) or Google Analytics 4. Both are simple to add.
-**Files:** `src/app/layout.tsx`, `package.json`
-
----
-
-### TD016: No JSON-LD structured data for products
-
-**Severity:** Medium
-**Impact:** `schema-dts` is installed but unused. Product pages don't have structured data, so Google won't show rich snippets (price, availability, images).
-**Fix:** Add `<script type="application/ld+json">` with Product schema to `src/app/shop/[slug]/page.tsx`.
-**Files:** `src/app/shop/[slug]/page.tsx`
-
 ---
 
 ## Resolved Tech Debt
+
+### TD-R015: TD010 — Admin session stores raw password in cookie — RESOLVED 2026-03-10
+**Was:** `admin-auth.ts` set the actual `ADMIN_PASSWORD` as the cookie value. Cookie theft = full admin access.
+**Fix:** Rewrote to HMAC-SHA256 signed session tokens with nonce. Timing-safe comparison. Cookie now stores `nonce.signature`, not the password.
+
+---
+
+### TD-R016: TD011 — Order tracking has no access control — RESOLVED 2026-03-10
+**Was:** `/api/orders/[id]` was public. Anyone with a UUID could view order details.
+**Fix:** Added `access_token` column to orders table. Checkout generates `crypto.randomBytes(16)` token, stored in DB and included in tracking URLs. API requires `?token=` param and verifies against DB.
+
+---
+
+### TD-R017: TD015 — No analytics — RESOLVED 2026-03-10
+**Was:** No traffic or conversion tracking.
+**Fix:** Added `@vercel/analytics` and `@vercel/speed-insights` to `layout.tsx`.
+
+---
+
+### TD-R018: TD016 — No JSON-LD structured data — RESOLVED 2026-03-10
+**Was:** Product pages had no structured data for Google rich snippets.
+**Fix:** Added `<script type="application/ld+json">` with schema.org Product type to `src/app/shop/[slug]/page.tsx`.
+
+---
+
+### TD-R019: TD003 — No image optimization pipeline — RESOLVED 2026-03-10
+**Was:** Cloudinary images served as-uploaded, no resizing/WebP.
+**Fix:** Added `optimizeImage()` in `src/lib/cloudinary.ts` using URL transforms (`c_limit,w_{width},q_auto,f_auto`). Applied to ProductCard (400px), ProductGallery main (800px) and thumbnails (200px).
+
+---
+
+### TD-R020: TD006 — Google Sheets fallback code still present — RESOLVED 2026-03-10
+**Was:** Dead code: `src/lib/google-sheets.ts` + `googleapis` npm package.
+**Fix:** Deleted `google-sheets.ts`, removed `googleapis` from package.json, cleaned imports in `products.ts`.
+
+---
+
+### TD-R021: TD007 — Unused Cloudinary SDK dependency — RESOLVED 2026-03-10
+**Was:** `cloudinary` npm package installed but unused (switched to REST API in Session 4).
+**Fix:** Removed `cloudinary` from package.json.
+
+---
 
 ### TD-R009: No sitemap, robots.txt, OG image, or error pages — RESOLVED 2026-03-09
 **Was:** `next-sitemap` installed but not configured. No robots.txt. No OG image for social shares. Using default Next.js error pages.

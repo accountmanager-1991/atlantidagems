@@ -4,6 +4,93 @@ All notable changes to the Ambar & Larimar Shop project.
 
 ---
 
+## [1.0.0] - 2026-03-12 — Launch: Security Hardening, Rate Limiting, Social Media Kit
+
+### Security
+- **Rate limiting** — new `src/lib/rate-limit.ts` (in-memory, per-IP, 5 attempts/15min)
+- **Admin login rate limiting** — 429 + Retry-After header, shows remaining attempts
+- **Contact form rate limiting** — 5 submissions/15min per IP
+- **Wholesale form rate limiting** — 5 submissions/15min per IP
+- **Revalidate auth bypass fix** — null check for `REVALIDATE_SECRET` env var
+- **Security headers** — X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy in `next.config.ts`
+
+### Changed
+- **Contact form** — removed Resend, replaced with GoHighLevel contact upsert (tag: "contact-form")
+- **Wholesale form** — removed Resend, replaced with GoHighLevel contact upsert (tag: "wholesale-inquiry")
+- **Removed `resend` package** — fully replaced by GHL across all endpoints
+
+### Added
+- **Pinterest domain verification** — `p:domain_verify` meta tag in `layout.tsx`
+- **Social media profile kit** — `scripts/generate-social-media-profiles.mjs` generates Word doc with all platform profiles
+- **Social media banners** — `brand-kit/social-banners.html` — 12 banners (Facebook, Twitter, Pinterest, Instagram x6, Profile, OG, YouTube) with one-click download buttons
+- **n8n auto-poster deploy script** — `n8n-workflows/deploy-social-autoposter.js`
+- **n8n auto-poster workflow** — `n8n-workflows/social-media-autoposter.json`
+
+### Infrastructure
+- Stripe approved + keys + webhook configured (2026-03-12)
+- Custom domain `ambarlarimarshop.com` live (Squarespace DNS → Vercel, SSL active)
+- Stripe business name changed to "Ambar & Larimar Shop"
+- All Vercel env vars configured
+
+---
+
+## [0.9.0] - 2026-03-11 — Subscription Box Strategy & GHL Email Integration
+
+### Added
+- **Subscription box market analysis** — Full pricing strategy, customer profiles, competitive landscape, revenue projections at 3K subscribers (D018)
+- **Market analysis documents** — EN + ES Word docs (`Ambar-Larimar-Subscription-Market-Analysis.docx`, `Ambar-Larimar-Analisis-de-Mercado-ES.docx`)
+- **Document generation scripts** — `scripts/generate-market-analysis.mjs` + `scripts/generate-market-analysis-es.mjs` (Node.js + `docx` package)
+- **GHL email integration** — `src/lib/ghl.ts` replaces Resend; upserts contacts with tags and custom fields
+- **3 GHL email templates** — Customer confirmation, owner notification, shipping confirmation created in GHL dashboard
+
+### Business
+- LLC: Emozca LLC (Wyoming) — filed 2026-03-11, filing number 2026-001915620
+- EIN: Obtained same day (2026-03-11) via IRS online
+- Stripe: Account created with Wise USD, pending 2-3 day verification
+- IRS 147C letter: Received via HelloFax, uploaded to Stripe
+
+### Infrastructure
+- `GHL_PRIVATE_KEY` + `GHL_LOCATION_ID` added to Vercel env vars
+- `docx` npm package added as dev dependency for document generation
+- Commit: `2937767`
+
+---
+
+## [0.8.0] - 2026-03-10 — Security Upgrades, Image Optimization & Hydration Fix
+
+### Security
+- **Admin session tokens** — replaced raw password in cookie with HMAC-SHA256 signed tokens (nonce + signature, timing-safe comparison)
+- **Order access tokens** — orders now require `?token=` parameter; tokens generated with `crypto.randomBytes(16)` and stored in DB
+
+### Added
+- **Vercel Analytics** (`@vercel/analytics/next`) — traffic + Web Vitals tracking
+- **Vercel Speed Insights** (`@vercel/speed-insights/next`) — performance monitoring
+- **JSON-LD structured data** — schema.org Product type on `/shop/[slug]` pages (name, price, availability, images, brand)
+- **Cloudinary image optimization** — `optimizeImage()` function adds `c_limit,w_{width},q_auto,f_auto` transforms to URLs
+- **Order `access_token` DB column** — added via migration in `/api/admin/setup`
+
+### Changed
+- **ProductCard** — images optimized to 400px width via Cloudinary transforms
+- **ProductGallery** — main image 800px, thumbnails 200px via Cloudinary transforms
+- **Checkout API** — generates access token, includes in Stripe success URL and email templates
+- **Order tracking** — requires token in URL (`/order/[id]?token=xxx`)
+- **Stripe webhook** — passes access token to email templates for tracking links
+
+### Fixed
+- **React hydration error #418** — AppProvider always renders `<AppContext.Provider>` wrapper (was conditionally rendering Fragment vs Provider, causing tree structure mismatch)
+- **Cloudinary cloud name** in `cloudinary.ts` — corrected from `ambarlarimarshop` to `dlk6s7llm`
+
+### Removed
+- **Google Sheets code** — deleted `src/lib/google-sheets.ts`, removed `googleapis` package
+- **Cloudinary SDK** — removed unused `cloudinary` package (using REST API since Session 4)
+
+### Infrastructure
+- Commits: `1ac158a` (v0.8.0), `bd0041d` (hydration fix)
+- Production DB updated via `/api/admin/setup` (access_token column)
+- 7 tech debt items resolved (TD003, TD006, TD007, TD010, TD011, TD015, TD016)
+
+---
+
 ## [0.7.0] - 2026-03-09 — Security Hardening, SEO & GitHub
 
 ### Added

@@ -60,6 +60,11 @@ export const metadata: Metadata = {
     title: `${BRAND.name} — ${BRAND.tagline}`,
     description: BRAND.description,
   },
+  verification: {
+    other: {
+      "p:domain_verify": "4e54d4f9b0f84b8392f6b4fa9dc7d197",
+    },
+  },
 };
 
 export default function RootLayout({

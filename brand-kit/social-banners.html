@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ambar & Larimar Shop — Social Media Banners</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; font-family: 'Montserrat', sans-serif; padding: 40px; color: #ccc; }
+  h1 { font-family: 'Cinzel', serif; margin-bottom: 10px; color: #EDD8A0; font-size: 28px; }
+  .instructions { color: #888; margin-bottom: 50px; font-size: 14px; }
+  .section { margin-bottom: 70px; }
+  .section h2 { font-family: 'Montserrat', sans-serif; font-weight: 600; color: #C9A84C; margin-bottom: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .section .size { color: #555; font-size: 12px; margin-bottom: 15px; }
+  .wrap { display: inline-block; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  .row { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  .banner { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+
+  .dl-btn {
+    display: inline-block; margin-top: 12px; padding: 10px 24px;
+    background: linear-gradient(135deg, #C9A84C, #EDD8A0); color: #0C1420;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+    letter-spacing: 0.05em; border: none; border-radius: 6px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .dl-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.4); }
+  .dl-btn:active { transform: translateY(0); }
+  .dl-btn:disabled { opacity: 0.5; cursor: wait; }
+
+  /* ── Brand colors (from website) ── */
+  /* Navy: #0C1420  |  Cream: #FAF7F0  |  Gold: #C9A84C  |  Gold Light: #EDD8A0 */
+  /* Amber: #D06800  |  Larimar: #3AADCC  |  Larimar Deep: #0E3A54 */
+
+  /* ── Gem drops with gold border, A/L letters, details ── */
+  .gem {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    position: relative; border: 2px solid #C9A84C;
+    font-family: 'Cinzel', serif; font-weight: 700;
+    color: rgba(255,255,255,0.9); overflow: hidden;
+  }
+  .gem-amber::after {
+    content: ''; position: absolute; bottom: 18%; left: 20%; width: 55%; height: 30%;
+    border-radius: 50% 40% 45% 55%;
+    background: radial-gradient(ellipse, rgba(107,48,0,0.4) 0%, rgba(107,48,0,0.1) 50%, transparent 70%);
+    transform: rotate(-15deg); pointer-events: none;
+  }
+  .gem-larimar::after {
+    content: ''; position: absolute; bottom: 22%; left: 10%; width: 80%; height: 18%;
+    border-radius: 50%;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.1) 60%, transparent 100%);
+    pointer-events: none;
+  }
+  .gem-larimar::before {
+    content: ''; position: absolute; bottom: 30%; left: 15%; width: 60%; height: 10%;
+    border-radius: 50%; background: rgba(255,255,255,0.13); transform: rotate(-5deg); pointer-events: none;
+  }
+  .gem-a-sm { width: 22px; height: 30px; background: linear-gradient(180deg, #FFB830 0%, #D06800 60%, #6B3000 100%); font-size:10px; z-index:2; }
+  .gem-l-sm { width: 22px; height: 30px; background: linear-gradient(180deg, #5CC8E0 0%, #3AADCC 40%, #1A7A9E 100%); font-size:10px; margin-left:-4px; }
+  .gem-a-md { width: 32px; height: 44px; background: linear-gradient(180deg, #FFB830 0%, #D06800 60%, #6B3000 100%); font-size:14px; z-index:2; }
+  .gem-l-md { width: 32px; height: 44px; background: linear-gradient(180deg, #5CC8E0 0%, #3AADCC 40%, #1A7A9E 100%); font-size:14px; margin-left:-6px; }
+  .gem-a-lg { width: 44px; height: 60px; background: linear-gradient(180deg, #FFB830 0%, #D06800 60%, #6B3000 100%); font-size:18px; z-index:2; }
+  .gem-l-lg { width: 44px; height: 60px; background: linear-gradient(180deg, #5CC8E0 0%, #3AADCC 40%, #1A7A9E 100%); font-size:18px; margin-left:-8px; }
+  /* Single gems (no overlap) */
+  .gem-a-solo { width: 32px; height: 44px; background: linear-gradient(180deg, #FFB830 0%, #D06800 60%, #6B3000 100%); font-size:14px; }
+  .gem-l-solo { width: 32px; height: 44px; background: linear-gradient(180deg, #5CC8E0 0%, #3AADCC 40%, #1A7A9E 100%); font-size:14px; }
+
+  .gp { display: inline-flex; align-items: flex-start; position: relative; }
+  .gp::after {
+    content: ''; position: absolute; top: -3px; left: 50%; transform: translateX(-50%);
+    width: 12px; height: 7px; background: linear-gradient(180deg, #EDD8A0, #C9A84C);
+    border-radius: 3px 3px 50% 50%; z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .gp-lg::after { width: 16px; height: 9px; top:-4px; }
+
+  .gold-line { height: 1px; background: linear-gradient(90deg, transparent, #C9A84C 20%, #EDD8A0 50%, #C9A84C 80%, transparent); }
+</style>
+</head>
+<body>
+
+<h1>Social Media Banners</h1>
+<p class="instructions">Open in Chrome. Click any download button or use "DOWNLOAD ALL" at the bottom.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FACEBOOK COVER: 820 x 312 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Facebook Cover</h2>
+  <div class="size">820 x 312px</div>
+  <div class="wrap">
+    <div id="fb-cover" class="banner" style="width:820px; height:312px; background:#0C1420;">
+      <div style="position:relative; z-index:1; display:flex; align-items:center; width:100%; padding:0 55px;">
+        <div class="gp gp-lg" style="margin-right:36px;">
+          <div class="gem gem-amber gem-a-lg">A</div>
+          <div class="gem gem-larimar gem-l-lg">L</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:9px; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:12px;">Handcrafted in the Dominican Republic</div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:32px; font-weight:400; letter-spacing:0.04em; line-height:1.15;">
+            THE RAREST STONES
+          </div>
+          <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:32px; font-weight:400; letter-spacing:0.04em;">
+            ON EARTH
+          </div>
+          <div style="margin-top:14px; font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.55); font-size:15px; font-weight:300;">
+            Larimar and Amber &mdash; found only in the Caribbean, set in silver and gold.
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:11px; font-weight:500; letter-spacing:0.05em;">ambarlarimarshop.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('fb-cover','Facebook-Cover-820x312')">Download Facebook Cover</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TWITTER / X HEADER: 1500 x 500 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Twitter / X Header</h2>
+  <div class="size">1500 x 500px</div>
+  <div class="wrap">
+    <div id="twitter-header" class="banner" style="width:1500px; height:500px; background:#0C1420;">
+      <!-- Subtle gold line top -->
+      <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent 15%, rgba(201,168,76,0.3) 40%, rgba(201,168,76,0.5) 50%, rgba(201,168,76,0.3) 60%, transparent 85%);"></div>
+
+      <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; width:100%; padding:0 130px;">
+        <div>
+          <div class="gp gp-lg" style="margin-bottom:24px;">
+            <div class="gem gem-amber gem-a-lg">A</div>
+            <div class="gem gem-larimar gem-l-lg">L</div>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:10px; letter-spacing:0.45em; text-transform:uppercase; margin-bottom:16px;">Handcrafted in the Dominican Republic</div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:52px; font-weight:400; letter-spacing:0.03em; line-height:1.1;">
+            THE RAREST STONES
+          </div>
+          <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:52px; font-weight:400; letter-spacing:0.03em;">
+            ON EARTH
+          </div>
+          <div style="margin-top:20px; font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.5); font-size:18px; font-weight:300;">
+            Larimar and Amber &mdash; found only in the Caribbean,<br>set in silver and gold, made to be treasured forever.
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Montserrat',sans-serif; color:rgba(250,247,240,0.3); font-size:10px; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:30px;">Fine Caribbean Jewelry</div>
+          <div style="font-family:'Montserrat',sans-serif; color:rgba(250,247,240,0.2); font-size:10px; letter-spacing:0.2em; margin-bottom:40px;">LARIMAR &middot; AMBER &middot; SILVER &middot; GOLD</div>
+          <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:15px; font-weight:500; letter-spacing:0.05em;">ambarlarimarshop.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('twitter-header','Twitter-Header-1500x500')">Download Twitter Header</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PINTEREST COVER: 800 x 450 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Pinterest Profile / Board Cover</h2>
+  <div class="size">800 x 450px</div>
+  <div class="wrap">
+    <div id="pinterest-cover" class="banner" style="width:800px; height:450px; background:#0C1420; flex-direction:column;">
+      <div style="position:relative; z-index:1; text-align:center;">
+        <div class="gp" style="justify-content:center; margin-bottom:20px;">
+          <div class="gem gem-amber gem-a-md">A</div>
+          <div class="gem gem-larimar gem-l-md">L</div>
+        </div>
+        <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:9px; letter-spacing:0.45em; text-transform:uppercase; margin-bottom:18px;">Handcrafted in the Dominican Republic</div>
+        <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:40px; font-weight:400; letter-spacing:0.04em; line-height:1.15;">THE RAREST STONES</div>
+        <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:40px; font-weight:400; letter-spacing:0.04em;">ON EARTH</div>
+        <div style="margin-top:18px; font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.5); font-size:16px; font-weight:300;">
+          Larimar and Amber &mdash; found only in the Caribbean, set in silver and gold.
+        </div>
+        <div style="margin-top:20px; font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:12px; font-weight:500; letter-spacing:0.05em;">ambarlarimarshop.com</div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('pinterest-cover','Pinterest-Cover-800x450')">Download Pinterest Cover</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- INSTAGRAM HIGHLIGHT COVERS (6) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Instagram Story Highlight Covers (6 variants)</h2>
+  <div class="size">1080 x 1920px (shown at 25% scale)</div>
+  <div id="highlights-row" class="row">
+
+    <!-- Larimar -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div class="gem gem-larimar gem-l-solo" style="margin:0 auto 20px;">L</div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:15px; letter-spacing:0.25em; font-weight:400;">LARIMAR</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.4); font-size:12px; margin-top:8px;">Collection</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amber -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div class="gem gem-amber gem-a-solo" style="margin:0 auto 20px;">A</div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:15px; letter-spacing:0.25em; font-weight:400;">AMBER</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.4); font-size:12px; margin-top:8px;">Collection</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Arrivals -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div class="gp" style="justify-content:center; margin-bottom:20px;">
+            <div class="gem gem-amber gem-a-sm">A</div>
+            <div class="gem gem-larimar gem-l-sm">L</div>
+          </div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:12px; letter-spacing:0.25em; font-weight:400;">NEW</div>
+          <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:15px; letter-spacing:0.25em; font-weight:400;">ARRIVALS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div style="color:#C9A84C; font-size:28px; margin-bottom:18px;">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:15px; letter-spacing:0.25em; font-weight:400;">REVIEWS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wholesale -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div class="gp" style="justify-content:center; margin-bottom:20px;">
+            <div class="gem gem-amber gem-a-sm">A</div>
+            <div class="gem gem-larimar gem-l-sm">L</div>
+          </div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:12px; letter-spacing:0.25em; font-weight:400;">WHOLESALE</div>
+          <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:15px; letter-spacing:0.25em; font-weight:400;">PARTNERS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Behind the Scenes -->
+    <div class="wrap">
+      <div class="banner" style="width:270px; height:480px; background:#0C1420; flex-direction:column;">
+        <div style="text-align:center;">
+          <div class="gp" style="justify-content:center; margin-bottom:20px;">
+            <div class="gem gem-amber gem-a-sm">A</div>
+            <div class="gem gem-larimar gem-l-sm">L</div>
+          </div>
+          <div class="gold-line" style="width:30px; margin:0 auto 14px;"></div>
+          <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:11px; letter-spacing:0.25em; font-weight:400;">BEHIND THE</div>
+          <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:15px; letter-spacing:0.25em; font-weight:400;">SCENES</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <br><button class="dl-btn" onclick="dlHighlights()">Download All Highlights</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PROFILE PICTURE: 400 x 400 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Profile Picture (all platforms)</h2>
+  <div class="size">400 x 400px</div>
+  <div class="wrap" style="border-radius:50%; overflow:hidden;">
+    <div id="profile-pic" class="banner" style="width:400px; height:400px; background:#0C1420; flex-direction:column;">
+      <div style="position:absolute; inset:10px; border-radius:50%; border:1px solid rgba(201,168,76,0.2);"></div>
+      <div style="position:relative; z-index:1; text-align:center;">
+        <div class="gp" style="justify-content:center; margin-bottom:16px;">
+          <div class="gem gem-amber gem-a-md">A</div>
+          <div class="gem gem-larimar gem-l-md">L</div>
+        </div>
+        <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:16px; letter-spacing:0.15em; font-weight:400; line-height:1.5;">
+          AMBAR &amp; LARIMAR
+        </div>
+        <div class="gold-line" style="width:40px; margin:8px auto;"></div>
+        <div style="font-family:'Montserrat',sans-serif; color:rgba(250,247,240,0.35); font-size:6.5px; letter-spacing:0.4em; text-transform:uppercase;">
+          Fine Caribbean Jewelry
+        </div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('profile-pic','Profile-Picture-400x400')">Download Profile Picture</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- OG / LINK PREVIEW: 1200 x 630 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>Link Preview / Open Graph</h2>
+  <div class="size">1200 x 630px</div>
+  <div class="wrap">
+    <div id="og-preview" class="banner" style="width:1200px; height:630px; background:#0C1420; flex-direction:column;">
+      <!-- Thin gold top line -->
+      <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent 10%, rgba(201,168,76,0.4) 35%, rgba(201,168,76,0.6) 50%, rgba(201,168,76,0.4) 65%, transparent 90%);"></div>
+
+      <div style="position:relative; z-index:1; text-align:center;">
+        <div class="gp gp-lg" style="justify-content:center; margin-bottom:28px;">
+          <div class="gem gem-amber gem-a-lg">A</div>
+          <div class="gem gem-larimar gem-l-lg">L</div>
+        </div>
+        <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:10px; letter-spacing:0.45em; text-transform:uppercase; margin-bottom:20px;">Handcrafted in the Dominican Republic</div>
+        <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:56px; font-weight:400; letter-spacing:0.04em; line-height:1.1;">THE RAREST STONES</div>
+        <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:56px; font-weight:400; letter-spacing:0.04em;">ON EARTH</div>
+        <div style="margin-top:24px; font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.45); font-size:18px; font-weight:300;">
+          Larimar and Amber &mdash; found only in the Caribbean, set in silver and gold, made to be treasured forever.
+        </div>
+        <div style="margin-top:30px; font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:14px; font-weight:500; letter-spacing:0.08em;">ambarlarimarshop.com</div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('og-preview','OG-Link-Preview-1200x630')">Download OG Preview</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- YOUTUBE BANNER: 2560 x 1440 (shown at ~40%) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>YouTube Channel Banner</h2>
+  <div class="size">2560 x 1440px (shown at 40% — safe zone: center 1546x423)</div>
+  <div class="wrap">
+    <div id="youtube-banner" class="banner" style="width:1024px; height:576px; background:#0C1420;">
+      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:618px; height:169px; border:1px dashed rgba(201,168,76,0.12); border-radius:2px;"></div>
+
+      <div style="position:relative; z-index:1; text-align:center;">
+        <div class="gp" style="justify-content:center; margin-bottom:16px;">
+          <div class="gem gem-amber gem-a-md">A</div>
+          <div class="gem gem-larimar gem-l-md">L</div>
+        </div>
+        <div style="font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:8px; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:14px;">Handcrafted in the Dominican Republic</div>
+        <div style="font-family:'Cinzel',serif; color:#FAF7F0; font-size:36px; font-weight:400; letter-spacing:0.04em; line-height:1.15;">THE RAREST STONES</div>
+        <div style="font-family:'Cinzel',serif; color:#C9A84C; font-size:36px; font-weight:400; letter-spacing:0.04em;">ON EARTH</div>
+        <div style="margin-top:14px; font-family:'Cormorant Garamond',serif; font-style:italic; color:rgba(250,247,240,0.4); font-size:15px; font-weight:300;">
+          Larimar and Amber &mdash; found only in the Caribbean, set in silver and gold.
+        </div>
+        <div style="margin-top:14px; font-family:'Montserrat',sans-serif; color:#C9A84C; font-size:11px; font-weight:500; letter-spacing:0.05em;">ambarlarimarshop.com</div>
+      </div>
+    </div>
+  </div>
+  <br><button class="dl-btn" onclick="dl('youtube-banner','YouTube-Banner-2560x1440')">Download YouTube Banner</button>
+</div>
+
+<!-- DOWNLOAD ALL -->
+<div style="margin-top:50px; padding:30px; background:rgba(201,168,76,0.05); border-radius:8px; border:1px solid rgba(201,168,76,0.2); text-align:center;">
+  <button class="dl-btn" onclick="dlAll()" style="font-size:16px; padding:14px 40px;">DOWNLOAD ALL BANNERS</button>
+  <p style="margin-top:12px; font-size:12px; color:#555;">Downloads 12 PNG files to your Downloads folder.</p>
+</div>
+
+<script>
+async function dl(id, name) {
+  const el = document.getElementById(id);
+  if (!el) return alert('Not found: ' + id);
+  const btn = event.target; btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Generating...';
+  try {
+    const c = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: null, logging: false });
+    const a = document.createElement('a'); a.download = name + '.png'; a.href = c.toDataURL('image/png'); a.click();
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = orig;
+}
+
+async function dlHighlights() {
+  const banners = document.getElementById('highlights-row').querySelectorAll('.banner');
+  const names = ['IG-Highlight-Larimar','IG-Highlight-Amber','IG-Highlight-NewArrivals','IG-Highlight-Reviews','IG-Highlight-Wholesale','IG-Highlight-BehindTheScenes'];
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Generating...';
+  for (let i = 0; i < banners.length; i++) {
+    try {
+      const c = await html2canvas(banners[i], { scale: 4, useCORS: true, backgroundColor: null, logging: false });
+      const a = document.createElement('a'); a.download = names[i] + '.png'; a.href = c.toDataURL('image/png'); a.click();
+      await new Promise(r => setTimeout(r, 500));
+    } catch(e) { console.error(e); }
+  }
+  btn.disabled = false; btn.textContent = 'Download All Highlights';
+}
+
+async function dlAll() {
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Downloading...';
+  const items = [
+    ['fb-cover','Facebook-Cover-820x312',2],['twitter-header','Twitter-Header-1500x500',2],
+    ['pinterest-cover','Pinterest-Cover-800x450',2],['profile-pic','Profile-Picture-400x400',2],
+    ['og-preview','OG-Link-Preview-1200x630',2],['youtube-banner','YouTube-Banner-2560x1440',2],
+  ];
+  for (const [id,name,s] of items) {
+    try {
+      const c = await html2canvas(document.getElementById(id), { scale:s, useCORS:true, backgroundColor:null, logging:false });
+      const a = document.createElement('a'); a.download = name+'.png'; a.href = c.toDataURL('image/png'); a.click();
+      await new Promise(r => setTimeout(r, 600));
+    } catch(e) { console.error(e); }
+  }
+  const hl = document.getElementById('highlights-row').querySelectorAll('.banner');
+  const hn = ['IG-Highlight-Larimar','IG-Highlight-Amber','IG-Highlight-NewArrivals','IG-Highlight-Reviews','IG-Highlight-Wholesale','IG-Highlight-BehindTheScenes'];
+  for (let i = 0; i < hl.length; i++) {
+    try {
+      const c = await html2canvas(hl[i], { scale:4, useCORS:true, backgroundColor:null, logging:false });
+      const a = document.createElement('a'); a.download = hn[i]+'.png'; a.href = c.toDataURL('image/png'); a.click();
+      await new Promise(r => setTimeout(r, 500));
+    } catch(e) { console.error(e); }
+  }
+  btn.disabled = false; btn.textContent = 'DOWNLOAD ALL BANNERS';
+}
+</script>
+
+</body>
+</html>
