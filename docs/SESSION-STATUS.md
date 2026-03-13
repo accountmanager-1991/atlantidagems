@@ -60,7 +60,7 @@
 2. Connect Google Drive credential in n8n UI
 3. Drop test image in Google Drive `to-post` folder
 4. Manual test → activate workflow
-5. Workflow: https://emozca.app.n8n.cloud/workflow/sIGi8hQuULc32L9D
+5. Workflow: *(open n8n dashboard to find workflow URL)*
 
 ## Completed Session 12
 
@@ -69,12 +69,12 @@
 | n8n social media auto-poster workflow | Done | `n8n-workflows/social-media-autoposter.json` — 17 nodes, schedule 3x/day |
 | Deploy script | Done | `n8n-workflows/deploy-social-autoposter.js` |
 | Meta app setup | Done | "Atlantida Order Notifications" — Instagram + Pages use cases configured |
-| Facebook Page ID obtained | Done | Page: "Ambar & Larimar Shop", ID: `1034538613080186` |
-| Instagram User ID confirmed | Done | `17841443336963073` |
+| Facebook Page ID obtained | Done | Page: "Ambar & Larimar Shop" *(ID in n8n vars)* |
+| Instagram User ID confirmed | Done | *(ID in n8n vars)* |
 | META_PAGE_ACCESS_TOKEN | Done | System user token via Emozca LLC Business Portfolio |
 | Google Drive folders | Done | to-post + posted folders created, IDs added to n8n Variables |
 | n8n Variables set | Done | All 5 variables added in n8n Settings → Variables |
-| Workflow deployed | Done | ID: `sIGi8hQuULc32L9D` |
+| Workflow deployed | Done | *(see n8n dashboard)* |
 | Anthropic credential | Blocked | Base URL must be `https://api.anthropic.com` (no trailing slash) |
 | Google Drive credential | Pending | Need to connect Google account in n8n |
 | Workflow activated | Pending | After credentials fixed |
@@ -168,7 +168,7 @@
 | Success page order tracking | Done | Shows order ID + "Track Your Order" button after checkout |
 | Email preview endpoint | Done | `/api/admin/preview-email` with sample data for all 3 templates |
 | WhatsApp Business Cloud setup | Done | Meta Developer Portal, Emozca LLC portfolio, system user + permanent token |
-| n8n WhatsApp workflow | Done | Deployed via API — Webhook → WhatsApp Notification (ID: `zQ1QFgkwEpcP6YZW`) |
+| n8n WhatsApp workflow | Done | Deployed via API — Webhook → WhatsApp Notification *(ID in n8n dashboard)* |
 | N8N_ORDER_WEBHOOK_URL on Vercel | Done | Production env var configured |
 
 ## Completed Session 5
@@ -240,7 +240,7 @@
 | GoHighLevel (email) | Active | Replaced Resend — `GHL_PRIVATE_KEY` + `GHL_LOCATION_ID` on Vercel |
 | Stripe | **Live** | Keys + webhook configured. Business name: "Ambar & Larimar Shop". Payments: Cards, Apple Pay, Amazon Pay, Cash App, Klarna, Link |
 | WhatsApp Business Cloud | Configured | Meta App "Atlantida Order Notifications", system user `n8n-bot`, permanent token |
-| n8n (WhatsApp workflow) | Deployed (not activated) | Workflow `zQ1QFgkwEpcP6YZW` — needs credential selection + activation in n8n UI |
+| n8n (WhatsApp workflow) | Deployed (not activated) | Needs credential selection + activation in n8n UI |
 | Custom domain | **Live** | `ambarlarimarshop.com` — DNS via Squarespace, SSL active |
 | LLC (Wyoming) | **Complete** | Emozca LLC, filing 2026-001915620, EIN obtained |
 
@@ -352,7 +352,7 @@
 | `NEXT_PUBLIC_BASE_URL` | Vercel | **Done** | `https://ambarlarimarshop.com` (set 2026-03-12) |
 | `GHL_PRIVATE_KEY` | Vercel | **Done** | GoHighLevel replaces Resend |
 | `GHL_LOCATION_ID` | Vercel | **Done** | GoHighLevel location |
-| `N8N_ORDER_WEBHOOK_URL` | Vercel | **Done** | `https://emozca.app.n8n.cloud/webhook/atlantida-order-webhook` |
+| `N8N_ORDER_WEBHOOK_URL` | Vercel | **Done** | *(n8n webhook URL — see Vercel env vars)* |
 
 ---
 
@@ -376,13 +376,13 @@
 |--------|-------|
 | Meta App | Atlantida Order Notifications |
 | Business Portfolio | Emozca LLC |
-| Phone Number ID | `1017967411400401` |
-| WhatsApp Business Account ID | `2396452047461051` |
-| System User | `n8n-bot` (ID: `61582015733803`) |
-| n8n Instance | `emozca.app.n8n.cloud` |
-| n8n Workflow ID | `zQ1QFgkwEpcP6YZW` |
-| Webhook URL | `https://emozca.app.n8n.cloud/webhook/atlantida-order-webhook` |
-| Recipient | `18099194205` (owner's WhatsApp) |
+| Phone Number ID | *(see Vercel env vars / Meta Business Settings)* |
+| WhatsApp Business Account ID | *(see Meta Business Settings)* |
+| System User | `n8n-bot` *(see Meta Business Settings)* |
+| n8n Instance | *(see n8n dashboard)* |
+| n8n Workflow ID | *(see n8n dashboard)* |
+| Webhook URL | *(stored in Vercel env `N8N_ORDER_WEBHOOK_URL`)* |
+| Recipient | *(owner's WhatsApp — see n8n workflow config)* |
 
 ---
 

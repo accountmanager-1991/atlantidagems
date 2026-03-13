@@ -169,7 +169,7 @@
 **Date:** 2026-03-09
 **Status:** Accepted
 
-**Context:** Owner preference — phone number `809-919-4205` and email `sales@ambarlarimarshop.com`.
+**Context:** Owner preference — phone and email as primary contact methods.
 
 **Decision:** Replaced all WhatsApp references across ~15 files with phone/email.
 
@@ -329,7 +329,7 @@
 **Date:** 2026-03-09
 **Status:** Accepted
 
-**Context:** Owner wants WhatsApp notifications for new orders to their personal number `809-919-4205`.
+**Context:** Owner wants WhatsApp notifications for new orders to their personal number.
 
 **Decision:** Use WhatsApp Business Cloud (official Meta API) with n8n as the automation layer.
 
@@ -341,11 +341,11 @@
 
 **Architecture:**
 - Meta App: "Atlantida Order Notifications" under Emozca LLC business portfolio
-- System User: `n8n-bot` (ID: `61582015733803`) with permanent token
-- Phone Number ID: `1017967411400401`
-- WhatsApp Business Account ID: `2396452047461051`
-- n8n Workflow: `zQ1QFgkwEpcP6YZW` (Webhook → WhatsApp node)
-- Webhook URL: `https://emozca.app.n8n.cloud/webhook/atlantida-order-webhook`
+- System User: `n8n-bot` with permanent token *(IDs in Meta Business Settings)*
+- Phone Number ID: *(see Meta Business Settings → WhatsApp)*
+- WhatsApp Business Account ID: *(see Meta Business Settings)*
+- n8n Workflow: *(see n8n dashboard)*
+- Webhook URL: *(stored in Vercel env `N8N_ORDER_WEBHOOK_URL`)*
 
 **Key Lesson:** When configuring n8n WhatsApp credentials with a system user token, the system user must have the WhatsApp Business Account assigned as an asset (with "Full control"), not just the app. Without this, the token will show "Invalid access token" even if correctly generated.
 

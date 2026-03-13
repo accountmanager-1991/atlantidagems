@@ -6,7 +6,8 @@ const https = require('https');
 // Set N8N_API_KEY env var before running: export N8N_API_KEY="your-key-here"
 const API_KEY = process.env.N8N_API_KEY;
 if (!API_KEY) { console.error('Error: N8N_API_KEY environment variable is required'); process.exit(1); }
-const BASE = 'emozca.app.n8n.cloud';
+// Set N8N_INSTANCE env var (e.g. "your-instance.app.n8n.cloud")
+const BASE = process.env.N8N_INSTANCE || 'your-instance.app.n8n.cloud';
 
 const workflow = {
   name: 'Atlantida - Order Notifications (WhatsApp)',
@@ -28,8 +29,8 @@ const workflow = {
       parameters: {
         resource: 'message',
         operation: 'send',
-        phoneNumberId: '1017967411400401',
-        recipientPhoneNumber: '18099194205',
+        phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || 'YOUR_PHONE_NUMBER_ID',
+        recipientPhoneNumber: process.env.WHATSAPP_RECIPIENT || 'YOUR_RECIPIENT_NUMBER',
         textBody: '={{ $json.body.message }}'
       },
       name: 'WhatsApp Notification',

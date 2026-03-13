@@ -19,8 +19,8 @@
       "parameters": {
         "resource": "message",
         "operation": "send",
-        "phoneNumberId": "1017967411400401",
-        "recipientPhoneNumber": "18099194205",
+        "phoneNumberId": "YOUR_PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "YOUR_RECIPIENT_NUMBER",
         "textBody": "={{ $json.body.message }}"
       },
       "id": "a1b2c3d4-0001-0001-0001-000000000002",

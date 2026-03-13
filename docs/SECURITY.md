@@ -96,7 +96,7 @@ n8n workflows process external data (webhooks, emails). Risks:
 - **Mitigation:** Never pass raw webhook payloads directly to AI nodes — extract and validate specific fields first
 
 Current n8n workflows:
-- `zQ1QFgkwEpcP6YZW` — WhatsApp order notifications (Webhook → WhatsApp)
+- WhatsApp order notifications workflow (Webhook → WhatsApp) — *(ID in n8n dashboard)*
 - Low risk (no AI nodes), but validate all incoming data
 
 ---

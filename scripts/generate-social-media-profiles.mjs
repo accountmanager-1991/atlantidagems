@@ -156,7 +156,7 @@ const doc = new Document({
         ["Shop Title", "Authentic Larimar & Dominican Amber Jewelry — Handcrafted in Silver & Gold"],
         ["About", "We are a family-owned jewelry workshop in the Dominican Republic, crafting pieces with two of the rarest gemstones on Earth: Larimar — a blue volcanic stone found nowhere else — and Dominican Blue Amber, prized for its clarity and golden glow. Every piece is handcrafted by local artisans and set in sterling silver or gold. From our workshop to your collection."],
         ["Shop Announcement", "Welcome! Free shipping on orders over $250. Every piece comes with a Certificate of Authenticity."],
-        ["Shop Members", "Eddy Ozoria — Owner & Curator"],
+        ["Shop Members", "Owner & Curator"],
         ["Location", "Dominican Republic"],
         ["Shipping", "$19.99 flat rate, free over $250"],
       ]),

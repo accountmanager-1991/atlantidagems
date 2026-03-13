@@ -1,19 +1,20 @@
 /**
  * Deploy: Ambar & Larimar — Social Media Auto-Poster
- * Deploys the workflow to your n8n instance at emozca.app.n8n.cloud
+ * Deploys the workflow to your n8n instance.
  *
  * Usage:
- *   N8N_API_KEY=your_key node n8n-workflows/deploy-social-autoposter.js
+ *   N8N_BASE_URL=https://your-instance.app.n8n.cloud/api/v1 N8N_API_KEY=your_key node n8n-workflows/deploy-social-autoposter.js
  *
  * Required env vars (set in your shell or .env.local):
- *   N8N_API_KEY  — your n8n API key (Settings > API in n8n UI)
+ *   N8N_API_KEY   — your n8n API key (Settings > API in n8n UI)
+ *   N8N_BASE_URL  — your n8n instance API URL (optional, defaults to placeholder)
  */
 
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
-const N8N_BASE_URL = "https://emozca.app.n8n.cloud/api/v1";
+const N8N_BASE_URL = process.env.N8N_BASE_URL || "https://your-instance.app.n8n.cloud/api/v1";
 const N8N_API_KEY  = process.env.N8N_API_KEY;
 
 if (!N8N_API_KEY) {
@@ -90,7 +91,8 @@ async function deploy() {
   console.log("5. ACTIVATE the workflow in n8n UI after configuring credentials.\n");
 
   console.log("─────────────────────────────────────────────────");
-  console.log(`🔗  Open in n8n: https://emozca.app.n8n.cloud/workflow/${result.id}`);
+  const instanceUrl = N8N_BASE_URL.replace("/api/v1", "");
+  console.log(`🔗  Open in n8n: ${instanceUrl}/workflow/${result.id}`);
   console.log("─────────────────────────────────────────────────\n");
 }
 

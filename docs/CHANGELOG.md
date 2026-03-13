@@ -128,7 +128,7 @@ All notable changes to the Ambar & Larimar Shop project.
 - **Public order API** (`/api/orders/[id]`) — no-auth endpoint for order tracking (excludes sensitive fields)
 - **Email preview** (`/api/admin/preview-email`) — preview all 3 email templates with sample data
 - **WhatsApp Business Cloud integration** — Meta Developer Portal app, system user `n8n-bot`, permanent token
-- **n8n WhatsApp workflow** — Webhook → WhatsApp Notification, deployed via API (ID: `zQ1QFgkwEpcP6YZW`)
+- **n8n WhatsApp workflow** — Webhook → WhatsApp Notification, deployed via API
 - **Shipping confirmation trigger** — admin checkbox to auto-send shipping email + WhatsApp when adding tracking
 
 ### Changed
@@ -139,7 +139,7 @@ All notable changes to the Ambar & Larimar Shop project.
 - **Database schema** — added `tracking_number`, `tracking_carrier`, `shipped_at`, `notes` columns to orders table
 
 ### Infrastructure
-- Deployed n8n workflow via REST API to `emozca.app.n8n.cloud`
+- Deployed n8n workflow via REST API to n8n cloud instance
 - Added `N8N_ORDER_WEBHOOK_URL` to Vercel production env
 - WhatsApp Business Cloud API configured (Meta App: "Atlantida Order Notifications")
 
@@ -216,7 +216,7 @@ All notable changes to the Ambar & Larimar Shop project.
 
 ### Changed
 - **Hero section** redesigned: 70/30 split layout (navy text area + image slideshow)
-- **Contact info** updated: WhatsApp replaced with phone (`809-919-4205`) and email (`sales@ambarlarimarshop.com`)
+- **Contact info** updated: WhatsApp replaced with phone and email contact methods
 - **Cart checkout** changed from WhatsApp to email-based ordering
 - **Wholesale form section** redesigned: cream background, side-by-side layout
 - **Product data flow**: Neon Postgres → Google Sheets → Mock data (three-tier fallback)
