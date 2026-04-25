@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
-import { sendOrderConfirmationGHL } from "@/lib/ghl";
+import { sendOrderConfirmationGHL, updateOpportunityStageByStatus } from "@/lib/ghl";
 
 interface OrderItem {
   id: string;
@@ -116,9 +116,13 @@ export async function POST(request: NextRequest) {
     // Send notifications in parallel
     const promises: Promise<void>[] = [];
 
-    // 1. GHL — create/update contact + trigger order confirmation email workflow
+    // 1. GHL — create/update contact, tag as customer, then move
+    //    the Opportunity to the "Paid" pipeline stage. Sequential because
+    //    the pipeline sync needs the contact to exist first.
     promises.push(
-      sendOrderConfirmationGHL(orderData)
+      sendOrderConfirmationGHL(orderData).then(() =>
+        updateOpportunityStageByStatus(customerEmail, "paid", orderId, amount),
+      ),
     );
 
     // 2. n8n webhook for WhatsApp notification
