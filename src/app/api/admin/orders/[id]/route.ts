@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { isAdmin } from "@/lib/admin-auth";
-import { sendShippingConfirmationGHL } from "@/lib/ghl";
+import { sendShippingConfirmationGHL, updateOpportunityStageByStatus } from "@/lib/ghl";
 
 export async function PUT(
   request: NextRequest,
@@ -33,6 +33,21 @@ export async function PUT(
         shipped_at = ${status === "shipped" ? sql`NOW()` : sql`shipped_at`}
       WHERE id = ${id}
     `;
+
+    // Move the GHL Opportunity to the corresponding pipeline stage
+    // (no-op if GHL_PIPELINE_ID + stage IDs aren't configured)
+    if (status) {
+      const orderRowsForStage = await sql`SELECT customer_email, total FROM orders WHERE id = ${id}`;
+      const o = orderRowsForStage[0];
+      if (o?.customer_email) {
+        await updateOpportunityStageByStatus(
+          o.customer_email,
+          status as "pending" | "paid" | "shipped" | "delivered" | "cancelled",
+          id,
+          String(o.total ?? "0"),
+        );
+      }
+    }
 
     // Send shipping confirmation if tracking number was added
     if (send_shipping_email && tracking_number) {

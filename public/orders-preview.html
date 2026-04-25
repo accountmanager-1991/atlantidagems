@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Orders Preview — Ambar & Larimar Admin</title>
+<link rel="stylesheet" href="/brand-preview.css">
+<style>
+  body { background: #F0EBE0; padding: 0; }
+  .admin-wrap { min-height: 100vh; }
+  .admin-header { background: var(--navy); color: var(--cream); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .admin-header .title { font-family: var(--font-heading); letter-spacing: 0.1em; font-size: 18px; text-transform: uppercase; color: var(--cream); }
+  .admin-header .ctrls { display: flex; gap: 16px; align-items: center; font-family: var(--font-ui); font-size: 11px; color: rgba(250,247,240,0.55); }
+
+  .tabs { background: #fff; border-bottom: 1px solid rgba(14,58,84,0.1); padding: 0 32px; display: flex; }
+  .tab { padding: 14px 24px; font-family: var(--font-ui); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(14,58,84,0.45); border-bottom: 2px solid transparent; cursor: pointer; }
+  .tab.active { color: var(--navy); font-weight: 500; border-bottom-color: var(--ambar-light); }
+
+  .content { max-width: 1320px; margin: 0 auto; padding: 32px; }
+
+  .row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .row-head h2 { margin: 0; padding: 0; }
+  .row-head h2::after { display: none; }
+  .row-head .subtitle { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.5); margin-top: 4px; letter-spacing: 0.05em; }
+
+  .actions { display: flex; gap: 12px; align-items: center; font-family: var(--font-ui); }
+  .view-toggle { display: inline-flex; border: 1px solid rgba(201,168,76,0.4); border-radius: 4px; overflow: hidden; }
+  .view-toggle button { background: #fff; border: none; padding: 8px 16px; font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(14,58,84,0.55); cursor: pointer; font-weight: 500; }
+  .view-toggle button.active { background: var(--ambar-light); color: var(--navy); }
+
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 32px; }
+  .kpi { background: #fff; border: 1px solid rgba(201,168,76,0.18); border-radius: 6px; padding: 16px; }
+  .kpi .label { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(14,58,84,0.5); font-weight: 500; }
+  .kpi .value { font-family: var(--font-heading); font-size: 26px; color: var(--navy); margin-top: 4px; }
+  .kpi.warn .value { color: #b8860b; }
+  .kpi.good .value { color: #157f3f; }
+  .kpi.gold .value { color: var(--gold-deep); }
+  .kpi.larimar .value { color: var(--larimar-mid); }
+
+  /* Grid view */
+  .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .order-card { background: #fff; border: 1px solid rgba(201,168,76,0.2); border-radius: 6px; overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative; }
+  .order-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(14,58,84,0.08); border-color: var(--gold); }
+  .order-card.selected { border-color: var(--ambar); box-shadow: 0 0 0 2px var(--ambar-light); }
+
+  .card-top { padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(201,168,76,0.12); }
+  .order-id { font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: rgba(14,58,84,0.55); }
+  .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; }
+  .status-pending { background: #fef9e8; color: #b8860b; }
+  .status-paid { background: #def0fa; color: #1A7A9E; }
+  .status-shipped { background: #e0eef5; color: #3b6e8f; }
+  .status-delivered { background: #e0f5e0; color: #157f3f; }
+  .status-cancelled { background: #fde0dc; color: #c0392b; }
+
+  .card-customer { padding: 12px 16px; }
+  .customer-name { font-family: var(--font-heading); font-size: 16px; color: var(--navy); letter-spacing: 0.04em; margin-bottom: 4px; }
+  .customer-meta { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.6); display: flex; gap: 8px; }
+  .customer-meta .flag { background: var(--cream-dark); padding: 2px 6px; border-radius: 3px; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .card-items { padding: 0 16px 12px; display: flex; gap: 6px; align-items: center; }
+  .item-thumbs { display: flex; gap: -8px; }
+  .item-thumb { width: 32px; height: 32px; border-radius: 4px; border: 2px solid #fff; margin-left: -8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); color: #fff; font-size: 11px; }
+  .item-thumb:first-child { margin-left: 0; }
+  .item-thumb.larimar { background: linear-gradient(135deg, #B8E8F4, #1A7A9E); }
+  .item-thumb.amber { background: linear-gradient(135deg, #FFD074, #6B3000); }
+  .item-thumb.bamber { background: linear-gradient(135deg, #72CCE0, #08283A); }
+  .item-thumb.gold { background: linear-gradient(135deg, #EDD8A0, #8A6418); color: var(--navy); }
+  .item-count { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.55); margin-left: 6px; }
+
+  .card-bottom { padding: 12px 16px; border-top: 1px solid rgba(201,168,76,0.12); display: flex; justify-content: space-between; align-items: center; background: #fbf8f0; }
+  .order-date { font-family: var(--font-ui); font-size: 10px; color: rgba(14,58,84,0.55); letter-spacing: 0.06em; }
+  .order-total { font-family: var(--font-heading); font-size: 18px; color: var(--gold-deep); }
+
+  .tracking-bar { padding: 8px 16px; background: var(--larimar-deep); color: var(--cream); font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.1em; display: flex; justify-content: space-between; }
+  .tracking-bar .label { opacity: 0.7; }
+
+  /* Detail panel (right side when selected) */
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: flex-start; }
+  @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
+  .detail-panel { background: #fff; border: 1px solid rgba(201,168,76,0.25); border-radius: 6px; position: sticky; top: 24px; padding: 22px; }
+  .detail-panel h3 { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--larimar-deep); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(201,168,76,0.2); }
+  .detail-row { font-family: var(--font-ui); font-size: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; gap: 12px; }
+  .detail-row .label { color: rgba(14,58,84,0.55); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; font-weight: 500; }
+  .detail-row .value { color: var(--navy); font-family: var(--font-body); font-size: 14px; text-align: right; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(14,58,84,0.55); margin-bottom: 4px; font-weight: 500; }
+  .form-group select, .form-group input, .form-group textarea {
+    width: 100%; padding: 8px 12px; font-family: var(--font-body); font-size: 14px;
+    border: 1px solid rgba(201,168,76,0.3); border-radius: 3px; color: var(--navy); background: #fff;
+  }
+  .form-group select:focus, .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); }
+
+  .save-btn { width: 100%; background: var(--ambar-light); color: var(--navy); border: none; padding: 12px; font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; cursor: pointer; border-radius: 3px; transition: background 0.2s; }
+  .save-btn:hover { background: var(--ambar); color: var(--cream); }
+
+  /* Sync indicators */
+  .sync-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+  .sync-card { background: var(--cream-dark); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--gold); font-family: var(--font-ui); font-size: 11px; }
+  .sync-card .sync-label { color: rgba(14,58,84,0.55); letter-spacing: 0.1em; text-transform: uppercase; font-size: 9px; font-weight: 500; }
+  .sync-card .sync-value { color: var(--navy); margin-top: 3px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .sync-card.active { background: #e0f5e0; border-left-color: #157f3f; }
+  .sync-card.active .sync-value { color: #157f3f; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(14,58,84,0.3); }
+  .sync-card.active .sync-dot { background: #157f3f; }
+
+  /* Items list in detail */
+  .items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .item-row { display: flex; gap: 10px; align-items: center; padding: 8px; background: var(--cream-dark); border-radius: 4px; }
+  .item-row .item-thumb-sm { width: 36px; height: 36px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 12px; color: #fff; }
+  .item-row .item-name { font-family: var(--font-body); font-size: 13px; color: var(--navy); flex: 1; }
+  .item-row .item-qty { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.55); }
+  .item-row .item-price { font-family: var(--font-body); font-size: 13px; color: var(--gold-deep); font-weight: 600; }
+
+  .totals { padding: 12px; background: var(--cream-dark); border-radius: 4px; margin-bottom: 14px; }
+  .totals .total-row { display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 12px; color: rgba(14,58,84,0.7); margin-bottom: 4px; }
+  .totals .total-row.grand { font-family: var(--font-heading); font-size: 16px; color: var(--navy); margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(201,168,76,0.3); }
+
+  .legend { background: #fff; border-left: 3px solid var(--gold); padding: 14px 18px; margin-bottom: 28px; font-family: var(--font-ui); font-size: 12px; color: rgba(14,58,84,0.7); border-radius: 0 4px 4px 0; }
+
+  .new-features { background: #fff; border: 2px dashed var(--gold); border-radius: 6px; padding: 18px 22px; margin-top: 32px; }
+  .new-features h3 { color: var(--larimar-deep); font-family: var(--font-heading); margin-top: 0; font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; }
+  .new-features ul { font-family: var(--font-body); font-size: 14px; color: var(--navy); line-height: 1.7; margin: 0; padding-left: 20px; }
+  .new-features ul li { margin-bottom: 6px; }
+  .new-features ul li strong { color: var(--gold-deep); }
+</style>
+</head>
+<body>
+  <div class="admin-wrap">
+
+    <div class="admin-header">
+      <div class="title">Ambar & Larimar Admin</div>
+      <div class="ctrls">
+        <span>EN</span><span>·</span><span>View Site</span><span>·</span><span>Logout</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab">Dashboard</div>
+      <div class="tab">Products</div>
+      <div class="tab">Inventory</div>
+      <div class="tab active">Orders</div>
+    </div>
+
+    <div class="content">
+
+      <div class="legend">
+        <strong>Preview</strong> — sample orders to show the new visual design. The current Orders tab already supports status updates, tracking number entry, GHL contact tagging ("order-shipped"), and n8n WhatsApp notifications. The upgrade is the visual redesign + new KPIs + grid view + GHL pipeline-stage sync.
+      </div>
+
+      <!-- Page header -->
+      <div class="row-head">
+        <div>
+          <h2>Orders</h2>
+          <div class="subtitle">5 orders · 1 needs shipping · 2 paid · GHL connected</div>
+        </div>
+        <div class="actions">
+          <div class="view-toggle">
+            <button class="active">▦ Grid</button>
+            <button>≡ Table</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpis">
+        <div class="kpi"><div class="label">Pending</div><div class="value">1</div></div>
+        <div class="kpi warn"><div class="label">Ready to Ship</div><div class="value">2</div></div>
+        <div class="kpi larimar"><div class="label">Shipped (7d)</div><div class="value">1</div></div>
+        <div class="kpi good"><div class="label">Delivered (30d)</div><div class="value">1</div></div>
+        <div class="kpi gold"><div class="label">Revenue (30d)</div><div class="value">$1,049</div></div>
+        <div class="kpi gold"><div class="label">Avg Order</div><div class="value">$210</div></div>
+      </div>
+
+      <!-- Two-column layout: Orders grid + selected detail panel -->
+      <div class="layout">
+
+        <!-- Grid (visual) view -->
+        <div class="grid-view">
+
+          <!-- Order 1: Pending -->
+          <div class="order-card">
+            <div class="card-top">
+              <span class="order-id">#A4F8B2C9</span>
+              <span class="status-badge status-pending">Pending</span>
+            </div>
+            <div class="card-customer">
+              <div class="customer-name">Linda Schmidt</div>
+              <div class="customer-meta"><span class="flag">DE</span><span>linda.schmidt@gmail.com</span></div>
+            </div>
+            <div class="card-items">
+              <div class="item-thumbs">
+                <div class="item-thumb amber">A</div>
+              </div>
+              <span class="item-count">1 item</span>
+            </div>
+            <div class="card-bottom">
+              <div class="order-date">Today · 2:14 PM</div>
+              <div class="order-total">$89</div>
+            </div>
+          </div>
+
+          <!-- Order 2: Paid (selected) -->
+          <div class="order-card selected">
+            <div class="card-top">
+              <span class="order-id">#7E3D9A1F</span>
+              <span class="status-badge status-paid">Paid · Ready</span>
+            </div>
+            <div class="card-customer">
+              <div class="customer-name">Maria Rodriguez</div>
+              <div class="customer-meta"><span class="flag">USA</span><span>Florida</span></div>
+            </div>
+            <div class="card-items">
+              <div class="item-thumbs">
+                <div class="item-thumb larimar">L</div>
+                <div class="item-thumb larimar">L</div>
+              </div>
+              <span class="item-count">2 items</span>
+            </div>
+            <div class="card-bottom">
+              <div class="order-date">Yesterday · 7:42 PM</div>
+              <div class="order-total">$228</div>
+            </div>
+          </div>
+
+          <!-- Order 3: Paid -->
+          <div class="order-card">
+            <div class="card-top">
+              <span class="order-id">#B2C8E4A7</span>
+              <span class="status-badge status-paid">Paid · Ready</span>
+            </div>
+            <div class="card-customer">
+              <div class="customer-name">Robert Thompson</div>
+              <div class="customer-meta"><span class="flag">USA</span><span>New York</span></div>
+            </div>
+            <div class="card-items">
+              <div class="item-thumbs">
+                <div class="item-thumb amber">A</div>
+                <div class="item-thumb bamber">B</div>
+              </div>
+              <span class="item-count">2 items</span>
+            </div>
+            <div class="card-bottom">
+              <div class="order-date">2 days ago</div>
+              <div class="order-total">$168</div>
+            </div>
+          </div>
+
+          <!-- Order 4: Shipped -->
+          <div class="order-card">
+            <div class="card-top">
+              <span class="order-id">#5F1A8D3E</span>
+              <span class="status-badge status-shipped">Shipped</span>
+            </div>
+            <div class="card-customer">
+              <div class="customer-name">James Chen</div>
+              <div class="customer-meta"><span class="flag">USA</span><span>California</span></div>
+            </div>
+            <div class="card-items">
+              <div class="item-thumbs">
+                <div class="item-thumb larimar">L</div>
+              </div>
+              <span class="item-count">1 item</span>
+            </div>
+            <div class="card-bottom">
+              <div class="order-date">5 days ago</div>
+              <div class="order-total">$129</div>
+            </div>
+            <div class="tracking-bar">
+              <span><span class="label">USPS</span> 9400 1108 9988 0234 5...</span>
+              <span>★ Tracked</span>
+            </div>
+          </div>
+
+          <!-- Order 5: Delivered -->
+          <div class="order-card">
+            <div class="card-top">
+              <span class="order-id">#3D9F2B6C</span>
+              <span class="status-badge status-delivered">Delivered</span>
+            </div>
+            <div class="card-customer">
+              <div class="customer-name">Sofía Almonte</div>
+              <div class="customer-meta"><span class="flag">DR</span><span>Santo Domingo</span></div>
+            </div>
+            <div class="card-items">
+              <div class="item-thumbs">
+                <div class="item-thumb larimar">L</div>
+                <div class="item-thumb amber">A</div>
+                <div class="item-thumb gold">G</div>
+              </div>
+              <span class="item-count">3 items</span>
+            </div>
+            <div class="card-bottom">
+              <div class="order-date">2 weeks ago</div>
+              <div class="order-total">$435</div>
+            </div>
+            <div class="tracking-bar" style="background: #157f3f;">
+              <span><span class="label">FedEx</span> 7892 3456 7890</span>
+              <span>✓ Delivered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail panel for the SELECTED order -->
+        <div class="detail-panel">
+          <h3>Order #7E3D9A1F</h3>
+
+          <div class="detail-row"><span class="label">Customer</span><span class="value">Maria Rodriguez</span></div>
+          <div class="detail-row"><span class="label">Email</span><span class="value" style="font-size:12px;">maria.r@gmail.com</span></div>
+          <div class="detail-row"><span class="label">Phone</span><span class="value" style="font-size:12px;">+1 (305) 555-0142</span></div>
+          <div class="detail-row"><span class="label">Address</span><span class="value" style="font-size:11px; line-height:1.4;">2847 Coral Way<br>Miami, FL 33145, USA</span></div>
+
+          <h3 style="margin-top:18px">Items</h3>
+          <div class="items-list">
+            <div class="item-row">
+              <div class="item-thumb-sm larimar">L</div>
+              <div class="item-name">Larimar Drop Earrings</div>
+              <div class="item-qty">×1</div>
+              <div class="item-price">$89</div>
+            </div>
+            <div class="item-row">
+              <div class="item-thumb-sm larimar">L</div>
+              <div class="item-name">Larimar Tear Pendant</div>
+              <div class="item-qty">×1</div>
+              <div class="item-price">$129</div>
+            </div>
+          </div>
+
+          <div class="totals">
+            <div class="total-row"><span>Subtotal</span><span>$218</span></div>
+            <div class="total-row"><span>Shipping</span><span>$10</span></div>
+            <div class="total-row grand"><span>Total</span><span>$228 USD</span></div>
+          </div>
+
+          <h3>Update order</h3>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select>
+              <option>Pending</option>
+              <option selected>Paid</option>
+              <option>Shipped</option>
+              <option>Delivered</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Carrier</label>
+            <select>
+              <option value="">Select carrier...</option>
+              <option>USPS</option>
+              <option>UPS</option>
+              <option>FedEx</option>
+              <option>DHL</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Tracking number</label>
+            <input type="text" placeholder="Enter tracking number...">
+          </div>
+
+          <div class="form-group">
+            <label>Internal notes</label>
+            <textarea rows="2" placeholder="Add notes..."></textarea>
+          </div>
+
+          <h3 style="margin-top:14px">Auto-syncs when you save</h3>
+          <div class="sync-grid">
+            <div class="sync-card active">
+              <div class="sync-label"><span class="sync-dot"></span> GHL Contact</div>
+              <div class="sync-value">Tag → "order-shipped"</div>
+            </div>
+            <div class="sync-card active">
+              <div class="sync-label"><span class="sync-dot"></span> GHL Pipeline</div>
+              <div class="sync-value">Stage → Shipped</div>
+            </div>
+            <div class="sync-card active">
+              <div class="sync-label"><span class="sync-dot"></span> Customer Email</div>
+              <div class="sync-value">Shipping notice</div>
+            </div>
+            <div class="sync-card active">
+              <div class="sync-label"><span class="sync-dot"></span> WhatsApp (n8n)</div>
+              <div class="sync-value">Owner alert</div>
+            </div>
+          </div>
+
+          <button class="save-btn">Save & Sync All</button>
+
+          <div style="text-align:center; margin-top:14px;">
+            <a href="#" style="font-family: var(--font-ui); font-size: 11px; color: var(--larimar-mid); text-decoration: none; letter-spacing: 0.1em;">View customer tracking page →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- What's new -->
+      <div class="new-features">
+        <h3>What's new in this redesign</h3>
+        <ul>
+          <li><strong>6 KPI cards</strong> at top — pending / ready-to-ship / shipped 7d / delivered 30d / revenue 30d / avg order — at-a-glance health check</li>
+          <li><strong>Grid view by default</strong> — visual order cards with customer name, country flag, item thumbnails, total, and shipping bar (replaces the dense list)</li>
+          <li><strong>Status-color cards</strong> — pending (yellow), paid (cyan), shipped (blue with tracking bar), delivered (green checkmark)</li>
+          <li><strong>Detail panel sticky on the right</strong> — click any order, the full info + update form follows you as you scroll</li>
+          <li><strong>"Auto-syncs when you save" panel</strong> — see exactly what each Save triggers (GHL contact tag, GHL pipeline stage, customer email, n8n WhatsApp), so you know nothing's missed</li>
+          <li><strong>GHL Pipeline-stage sync (NEW)</strong> — moves the lead through your sales pipeline (Lead → Order Placed → Shipped → Delivered) instead of just tagging the contact (requires you to set up a Pipeline in GHL first — I'll show you how if you want)</li>
+          <li><strong>Brand-aligned styling</strong> — Cinzel headings, Cormorant body, navy/gold/cream/larimar palette throughout (replacing the gray/blue Tailwind defaults)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

@@ -112,6 +112,90 @@ export async function sendOrderConfirmationGHL(data: OrderData) {
   }
 }
 
+// Move a contact's Opportunity through the GHL sales pipeline by status.
+// Requires GHL_PIPELINE_ID + 5 stage IDs configured in env vars.
+// Silently skips if env vars are missing — the app still works without it.
+export async function updateOpportunityStageByStatus(
+  contactEmail: string,
+  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled",
+  orderId: string,
+  amount: string,
+): Promise<void> {
+  const pipelineId = process.env.GHL_PIPELINE_ID;
+  const stageMap: Record<string, string | undefined> = {
+    pending: process.env.GHL_STAGE_PENDING,
+    paid: process.env.GHL_STAGE_PAID,
+    shipped: process.env.GHL_STAGE_SHIPPED,
+    delivered: process.env.GHL_STAGE_DELIVERED,
+    cancelled: process.env.GHL_STAGE_CANCELLED,
+  };
+  const stageId = stageMap[status];
+  const locationId = process.env.GHL_LOCATION_ID;
+  const apiKey = process.env.GHL_PRIVATE_KEY;
+
+  if (!apiKey || !locationId || !pipelineId || !stageId) {
+    // Pipeline sync not configured — that's OK, contact tagging still happens
+    return;
+  }
+
+  try {
+    // 1. Find the contact by email to get its contactId
+    const contactRes = await fetch(
+      `${GHL_API_URL}/contacts/search?locationId=${locationId}&query=${encodeURIComponent(contactEmail)}`,
+      { headers: getHeaders() },
+    );
+    if (!contactRes.ok) return;
+    const contactJson = await contactRes.json();
+    const contactId = contactJson.contacts?.[0]?.id;
+    if (!contactId) return;
+
+    // 2. Find the contact's Opportunity in this pipeline (or create one)
+    const oppSearchRes = await fetch(
+      `${GHL_API_URL}/opportunities/search?location_id=${locationId}&pipeline_id=${pipelineId}&contact_id=${contactId}`,
+      { headers: getHeaders() },
+    );
+    let opportunityId: string | undefined;
+    if (oppSearchRes.ok) {
+      const oppJson = await oppSearchRes.json();
+      opportunityId = oppJson.opportunities?.[0]?.id;
+    }
+
+    if (opportunityId) {
+      // Update existing opportunity's stage
+      await fetch(`${GHL_API_URL}/opportunities/${opportunityId}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          pipelineId,
+          pipelineStageId: stageId,
+          status: status === "cancelled" ? "lost" : status === "delivered" ? "won" : "open",
+          name: `Order ${orderId}`,
+          monetaryValue: parseFloat(amount) || 0,
+        }),
+      });
+      console.log(`GHL pipeline: opp ${opportunityId} → stage ${status}`);
+    } else {
+      // Create a new opportunity in the pipeline
+      await fetch(`${GHL_API_URL}/opportunities/`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          pipelineId,
+          locationId,
+          pipelineStageId: stageId,
+          status: status === "cancelled" ? "lost" : status === "delivered" ? "won" : "open",
+          name: `Order ${orderId}`,
+          contactId,
+          monetaryValue: parseFloat(amount) || 0,
+        }),
+      });
+      console.log(`GHL pipeline: created opp for ${contactEmail} at stage ${status}`);
+    }
+  } catch (err) {
+    console.error("GHL pipeline sync failed:", err);
+  }
+}
+
 // Called when admin adds tracking — tags contact as "order-shipped"
 export async function sendShippingConfirmationGHL(data: ShippingData) {
   if (!process.env.GHL_PRIVATE_KEY || !process.env.GHL_LOCATION_ID) {

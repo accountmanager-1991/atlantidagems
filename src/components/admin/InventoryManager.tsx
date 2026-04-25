@@ -23,6 +23,13 @@ type EnrichedProduct = Record<string, any> & {
 };
 
 type SortKey = "sku" | "name" | "qty" | "cost" | "retail" | "margin" | "value";
+type ViewMode = "grid" | "table";
+
+function stoneClass(stone: string): string {
+  if (stone === "amber") return "bg-gradient-to-br from-ambar-light via-ambar to-ambar-deep";
+  if (stone === "blue-amber") return "bg-gradient-to-br from-larimar via-larimar-mid to-larimar-deep";
+  return "bg-gradient-to-br from-larimar via-larimar-mid to-larimar-deep";
+}
 
 const T: Record<AdminLang, Record<string, string>> = {
   en: {
@@ -74,6 +81,7 @@ export default function InventoryManager({ products, lang }: { products: DbProdu
   const [sortKey, setSortKey] = useState<SortKey>("value");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [view, setView] = useState<ViewMode>("grid");
 
   const rows = useMemo<EnrichedProduct[]>(() => {
     const enriched: EnrichedProduct[] = products.map((p) => {
@@ -167,6 +175,16 @@ export default function InventoryManager({ products, lang }: { products: DbProdu
               className="w-4 h-4 accent-ambar-light" />
             {t.lowStockOnly}
           </label>
+          <div className="inline-flex border border-gold/40 rounded overflow-hidden">
+            <button onClick={() => setView("grid")}
+              className={`px-4 py-2 font-ui text-xs tracking-wider uppercase font-medium transition-colors ${view === "grid" ? "bg-ambar-light text-navy" : "bg-white text-ocean/55 hover:bg-cream-dark"}`}>
+              ▦ {lang === "es" ? "Cuadricula" : "Grid"}
+            </button>
+            <button onClick={() => setView("table")}
+              className={`px-4 py-2 font-ui text-xs tracking-wider uppercase font-medium transition-colors ${view === "table" ? "bg-ambar-light text-navy" : "bg-white text-ocean/55 hover:bg-cream-dark"}`}>
+              ≡ {lang === "es" ? "Tabla" : "Table"}
+            </button>
+          </div>
           <button onClick={exportCsv}
             className="px-4 py-2 bg-ocean text-cream rounded font-ui text-xs tracking-wider uppercase hover:bg-ocean/80 transition-colors">
             {t.exportCsv}
@@ -184,6 +202,71 @@ export default function InventoryManager({ products, lang }: { products: DbProdu
       {rows.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-lg border border-gold/10">
           <p className="font-ui text-sm text-ocean/50">{t.noData}</p>
+        </div>
+      ) : view === "grid" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {rows.map((p) => {
+            const low = p._qty > 0 && p._qty <= LOW_STOCK_THRESHOLD;
+            const out = p._qty === 0;
+            const cardBg = out ? "bg-red-50/40" : low ? "bg-yellow-50/40" : "bg-white";
+            const stoneCls = stoneClass(p.stone_type);
+            const marginColor = p._margin >= 50 ? "text-green-700" : p._margin >= 30 ? "text-yellow-700" : "text-red-600";
+            const stoneLetter = (p.stone_type || "X").charAt(0).toUpperCase();
+            const badgeCls = out
+              ? "bg-red-500 text-white"
+              : low
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-green-100 text-green-700";
+            const badgeText = out ? STOCK_LABELS[lang]["sold-out"] : low ? STOCK_LABELS[lang]["low-stock"] : STOCK_LABELS[lang]["in-stock"];
+            return (
+              <div key={p.id} className={`${cardBg} rounded-lg border border-gold/15 overflow-hidden transition-all hover:shadow-md hover:border-gold hover:-translate-y-0.5`}>
+                {/* Photo / placeholder */}
+                <div className={`aspect-square relative overflow-hidden ${stoneCls}`}>
+                  {p.image_main ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.image_main} alt={p.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center font-heading text-7xl text-white/15 font-bold">
+                      {stoneLetter}
+                    </div>
+                  )}
+                  <span className={`absolute top-2 right-2 px-2.5 py-1 rounded-full font-ui text-[10px] uppercase tracking-wider font-semibold ${badgeCls}`}>
+                    {badgeText}
+                  </span>
+                  {p.sku && (
+                    <span className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white font-mono text-[10px]">
+                      {p.sku}
+                    </span>
+                  )}
+                </div>
+                {/* Card body */}
+                <div className="p-3.5">
+                  <p className="font-heading text-sm tracking-[0.04em] text-ocean leading-tight mb-1">{p.name || "—"}</p>
+                  <p className="font-ui text-[10px] uppercase tracking-[0.18em] text-ocean/55 mb-3">
+                    {CATEGORY_LABELS[lang][p.category] || p.category}
+                  </p>
+                  <div className="grid grid-cols-2 gap-y-2 gap-x-3 pt-3 border-t border-gold/15 font-ui text-[11px]">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-[0.15em] text-ocean/55 font-medium">{t.qty}</p>
+                      <p className={`font-body text-sm mt-0.5 ${out ? "text-red-600 font-semibold" : low ? "text-yellow-700 font-semibold" : "text-ocean"}`}>{p._qty}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-[0.15em] text-ocean/55 font-medium">{t.margin}</p>
+                      <p className={`font-body text-sm mt-0.5 font-semibold ${marginColor}`}>{p._margin.toFixed(1)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-[0.15em] text-ocean/55 font-medium">{t.cost}</p>
+                      <p className="font-body text-sm text-ocean mt-0.5">{fmtUSD(p._cost)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-[0.15em] text-ocean/55 font-medium">{t.retail}</p>
+                      <p className="font-body text-sm text-gold-deep mt-0.5 font-semibold">{fmtUSD(p._retail)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gold/10 overflow-hidden">

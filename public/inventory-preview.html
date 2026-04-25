@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inventory Preview — Ambar & Larimar Admin</title>
+<link rel="stylesheet" href="/brand-preview.css">
+<style>
+  /* Mimics the actual admin page styling */
+  body { background: #F0EBE0; padding: 0; }
+  .admin-wrap { min-height: 100vh; }
+  .admin-header { background: var(--navy); color: var(--cream); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .admin-header .title { font-family: var(--font-heading); letter-spacing: 0.1em; font-size: 18px; text-transform: uppercase; color: var(--cream); }
+  .admin-header .ctrls { display: flex; gap: 16px; align-items: center; font-family: var(--font-ui); font-size: 11px; color: rgba(250,247,240,0.55); }
+
+  .tabs { background: #fff; border-bottom: 1px solid rgba(14,58,84,0.1); padding: 0 32px; display: flex; }
+  .tab { padding: 14px 24px; font-family: var(--font-ui); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(14,58,84,0.45); border-bottom: 2px solid transparent; cursor: pointer; }
+  .tab.active { color: var(--navy); font-weight: 500; border-bottom-color: var(--ambar-light); }
+
+  .content { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  .row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .row-head h2 { margin: 0; padding: 0; }
+  .row-head h2::after { display: none; }
+  .row-head .subtitle { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.5); margin-top: 4px; letter-spacing: 0.05em; }
+  .actions { display: flex; gap: 12px; align-items: center; font-family: var(--font-ui); }
+  .actions label { display: flex; gap: 8px; align-items: center; font-size: 12px; color: rgba(14,58,84,0.7); }
+  .actions input[type="checkbox"] { accent-color: var(--ambar-light); }
+
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi { background: #fff; border: 1px solid rgba(201,168,76,0.18); border-radius: 6px; padding: 18px; }
+  .kpi .label { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(14,58,84,0.5); font-weight: 500; }
+  .kpi .value { font-family: var(--font-heading); font-size: 28px; color: var(--navy); margin-top: 6px; }
+  .kpi.good .value { color: #157f3f; }
+  .kpi.warn .value { color: #b8860b; }
+  .kpi.bad .value { color: #c0392b; }
+
+  /* Inventory table */
+  .table-wrap { background: #fff; border: 1px solid rgba(201,168,76,0.18); border-radius: 6px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--font-ui); }
+  thead { background: var(--cream-dark); }
+  th { padding: 12px 16px; text-align: left; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(14,58,84,0.55); cursor: pointer; user-select: none; font-weight: 500; }
+  th.sorted { color: var(--navy); }
+  th.right { text-align: right; }
+  td { padding: 14px 16px; border-top: 1px solid rgba(201,168,76,0.1); font-family: var(--font-body); color: var(--navy); font-size: 14px; vertical-align: middle; }
+  td.mono { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: rgba(14,58,84,0.7); }
+  td.right { text-align: right; }
+  td.muted { color: rgba(14,58,84,0.65); }
+  td.gold { color: var(--gold-deep); font-weight: 500; }
+  tr.low { background: #fef9e8; }
+  tr.out { background: #fdeae8; }
+  tr.normal:hover { background: #fbf7eb; }
+
+  .product-cell { display: flex; align-items: center; gap: 12px; }
+  .thumb { width: 38px; height: 38px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 12px; }
+  .thumb.larimar { background: linear-gradient(135deg, #B8E8F4, #1A7A9E); color: #fff; }
+  .thumb.amber { background: linear-gradient(135deg, #FFD074, #6B3000); color: #fff; }
+  .thumb.bamber { background: linear-gradient(135deg, #72CCE0, #08283A); color: #fff; }
+  .thumb.gold { background: linear-gradient(135deg, #EDD8A0, #8A6418); color: var(--navy); }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+  .badge.in { background: #e0f5e0; color: #157f3f; }
+  .badge.low { background: #fdf3c5; color: #b8860b; }
+  .badge.out { background: #fde0dc; color: #c0392b; }
+  .badge.mto { background: #def0fa; color: #1A7A9E; }
+
+  .margin-good { color: #157f3f; font-weight: 500; }
+  .margin-warn { color: #b8860b; font-weight: 500; }
+  .margin-bad { color: #c0392b; font-weight: 500; }
+
+  tfoot tr { background: var(--cream-dark); border-top: 2px solid var(--gold); }
+  tfoot td { font-weight: 700; color: var(--navy); font-family: var(--font-heading); }
+
+  .csv-btn {
+    background: var(--larimar-deep);
+    color: var(--cream);
+    border: none;
+    padding: 8px 18px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .legend { background: #fff; border-left: 3px solid var(--gold); padding: 14px 18px; margin-bottom: 28px; font-family: var(--font-ui); font-size: 12px; color: rgba(14,58,84,0.7); border-radius: 0 4px 4px 0; }
+
+  /* View toggle */
+  .view-toggle { display: inline-flex; border: 1px solid rgba(201,168,76,0.4); border-radius: 4px; overflow: hidden; }
+  .view-toggle button { background: #fff; border: none; padding: 8px 16px; font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(14,58,84,0.55); cursor: pointer; font-weight: 500; }
+  .view-toggle button.active { background: var(--ambar-light); color: var(--navy); }
+
+  /* Grid (visual) view */
+  .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+  .product-card { background: #fff; border: 1px solid rgba(201,168,76,0.18); border-radius: 6px; overflow: hidden; transition: all 0.2s; position: relative; }
+  .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14,58,84,0.08); border-color: var(--gold); }
+  .product-photo { aspect-ratio: 1/1; background: linear-gradient(135deg, var(--cream), var(--cream-dark)); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .product-photo.larimar { background: linear-gradient(135deg, #B8E8F4 0%, #3AADCC 50%, #0E3A54 100%); }
+  .product-photo.amber { background: linear-gradient(135deg, #FFD074 0%, #D06800 50%, #6B3000 100%); }
+  .product-photo.bamber { background: linear-gradient(135deg, #9FE3F2 0%, #1A7A9E 50%, #08283A 100%); }
+  .product-photo.gold { background: linear-gradient(135deg, #F5E5B5 0%, #C9A84C 50%, #8A6418 100%); }
+  .product-photo .placeholder-text { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.55); padding: 4px 12px; border: 1px solid rgba(255,255,255,0.45); border-radius: 2px; }
+  .product-photo .stone-letter { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-heading); font-size: 100px; color: rgba(255,255,255,0.18); font-weight: 700; }
+
+  .photo-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 4px 10px; border-radius: 12px; font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+  .photo-badge.in { color: #157f3f; }
+  .photo-badge.low { color: #b8860b; }
+  .photo-badge.out { background: #c0392b; color: #fff; }
+
+  .photo-sku { position: absolute; bottom: 10px; left: 10px; background: rgba(12,20,32,0.7); color: #fff; padding: 4px 10px; border-radius: 3px; font-family: 'SF Mono', Consolas, monospace; font-size: 10px; }
+
+  .card-body { padding: 14px 16px; }
+  .card-name { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.06em; color: var(--navy); margin-bottom: 4px; line-height: 1.3; }
+  .card-cat { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(14,58,84,0.55); margin-bottom: 12px; }
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; padding-top: 12px; border-top: 1px solid rgba(201,168,76,0.15); font-family: var(--font-ui); font-size: 11px; }
+  .card-stats .stat-label { color: rgba(14,58,84,0.55); letter-spacing: 0.1em; text-transform: uppercase; font-size: 9px; font-weight: 500; }
+  .card-stats .stat-value { color: var(--navy); margin-top: 2px; font-size: 14px; font-family: var(--font-body); }
+  .card-stats .stat-value.gold { color: var(--gold-deep); font-weight: 600; }
+  .card-stats .stat-value.green { color: #157f3f; font-weight: 600; }
+  .card-stats .stat-value.warn { color: #b8860b; font-weight: 600; }
+  .card-stats .stat-value.red { color: #c0392b; font-weight: 600; }
+
+  .product-card.low { background: #fef9e8; }
+  .product-card.out { background: #fdeae8; }
+</style>
+</head>
+<body>
+  <div class="admin-wrap">
+
+    <!-- Admin header -->
+    <div class="admin-header">
+      <div class="title">Ambar & Larimar Admin</div>
+      <div class="ctrls">
+        <span>EN</span><span>·</span><span>View Site</span><span>·</span><span>Logout</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab">Dashboard</div>
+      <div class="tab">Products</div>
+      <div class="tab active">Inventory</div>
+      <div class="tab">Orders</div>
+    </div>
+
+    <div class="content">
+
+      <div class="legend">
+        <strong>This is a preview</strong> — same component the live admin renders, with sample products. Once you add real inventory data (SKU + stock qty + 4 cost fields per product), it'll auto-populate from the Neon database.
+      </div>
+
+      <!-- Page header with view toggle -->
+      <div class="row-head">
+        <div>
+          <h2>Inventory</h2>
+          <div class="subtitle">Stock levels, costs, and margin by product</div>
+        </div>
+        <div class="actions">
+          <label><input type="checkbox"> Low stock only</label>
+          <div class="view-toggle">
+            <button onclick="showView('grid')" id="grid-btn" class="active">▦ Grid</button>
+            <button onclick="showView('table')" id="table-btn">≡ Table</button>
+          </div>
+          <button class="csv-btn">Export CSV</button>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpis">
+        <div class="kpi"><div class="label">Total Units</div><div class="value">50</div></div>
+        <div class="kpi"><div class="label">Inventory Value (at cost)</div><div class="value">$1,865</div></div>
+        <div class="kpi"><div class="label">Potential Revenue</div><div class="value">$5,370</div></div>
+        <div class="kpi good"><div class="label">Avg Margin</div><div class="value">65.3%</div></div>
+      </div>
+
+      <!-- Grid (visual) view -->
+      <div id="grid-view" class="grid-view">
+        <div class="product-card">
+          <div class="product-photo larimar">
+            <div class="stone-letter">L</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge in">In Stock</div>
+            <div class="photo-sku">AL-LARSS-EAR-001</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Larimar Drop Earrings</div>
+            <div class="card-cat">Earrings · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value">12</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value warn">58.4%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$37</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$89</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-photo larimar">
+            <div class="stone-letter">L</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge in">In Stock</div>
+            <div class="photo-sku">AL-LARSS-PND-002</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Larimar Tear Pendant</div>
+            <div class="card-cat">Pendants · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value">5</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">67.4%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$42</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$129</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-photo amber">
+            <div class="stone-letter">A</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge in">In Stock</div>
+            <div class="photo-sku">AL-AMBSS-EAR-003</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Amber Drop Earrings</div>
+            <div class="card-cat">Earrings · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value">8</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">67.1%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$26</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$79</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card low">
+          <div class="product-photo amber">
+            <div class="stone-letter">A</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge low">Low Stock</div>
+            <div class="photo-sku">AL-AMBSS-PND-004</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Amber Halo Pendant</div>
+            <div class="card-cat">Pendants · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value warn">3</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">64.6%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$35</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$99</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card out">
+          <div class="product-photo gold">
+            <div class="stone-letter">G</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge out">Sold Out</div>
+            <div class="photo-sku">AL-LARGO-NCK-005</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Larimar Gold Necklace</div>
+            <div class="card-cat">Necklaces · Gold</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value red">0</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">66.0%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$95</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$279</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-photo bamber">
+            <div class="stone-letter">B</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge in">In Stock</div>
+            <div class="photo-sku">AL-BAMSS-PND-006</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Blue Amber Pendant</div>
+            <div class="card-cat">Pendants · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value">7</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">69.8%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$48</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$159</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-photo larimar">
+            <div class="stone-letter">L</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge in">In Stock</div>
+            <div class="photo-sku">AL-LARSS-BRC-007</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Larimar Cuff Bracelet</div>
+            <div class="card-cat">Bracelets · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value">14</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">65.1%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$38</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$109</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card low">
+          <div class="product-photo amber">
+            <div class="stone-letter">A</div>
+            <div class="placeholder-text">Photo · 1080×1080</div>
+            <div class="photo-badge low">Low Stock</div>
+            <div class="photo-sku">AL-AMBSS-RNG-008</div>
+          </div>
+          <div class="card-body">
+            <div class="card-name">Amber Solitaire Ring</div>
+            <div class="card-cat">Rings · Sterling Silver</div>
+            <div class="card-stats">
+              <div><div class="stat-label">Stock</div><div class="stat-value warn">1</div></div>
+              <div><div class="stat-label">Margin</div><div class="stat-value green">66.3%</div></div>
+              <div><div class="stat-label">Cost</div><div class="stat-value">$30</div></div>
+              <div><div class="stat-label">Retail</div><div class="stat-value gold">$89</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div id="table-view" class="table-wrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th class="sorted">SKU ↓</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th class="right">Qty</th>
+              <th class="right">Unit Cost</th>
+              <th class="right">Retail</th>
+              <th class="right">Margin %</th>
+              <th class="right">Stock Value</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="normal">
+              <td class="mono">AL-LARSS-EAR-001</td>
+              <td><div class="product-cell"><div class="thumb larimar">L</div>Larimar Drop Earrings</div></td>
+              <td class="muted">Earrings</td>
+              <td class="right">12</td>
+              <td class="right muted">$37</td>
+              <td class="right gold">$89</td>
+              <td class="right margin-warn">58.4%</td>
+              <td class="right">$444</td>
+              <td><span class="badge in">In Stock</span></td>
+            </tr>
+            <tr class="normal">
+              <td class="mono">AL-LARSS-PND-002</td>
+              <td><div class="product-cell"><div class="thumb larimar">L</div>Larimar Tear Pendant</div></td>
+              <td class="muted">Pendants</td>
+              <td class="right">5</td>
+              <td class="right muted">$42</td>
+              <td class="right gold">$129</td>
+              <td class="right margin-good">67.4%</td>
+              <td class="right">$210</td>
+              <td><span class="badge in">In Stock</span></td>
+            </tr>
+            <tr class="normal">
+              <td class="mono">AL-AMBSS-EAR-003</td>
+              <td><div class="product-cell"><div class="thumb amber">A</div>Amber Drop Earrings</div></td>
+              <td class="muted">Earrings</td>
+              <td class="right">8</td>
+              <td class="right muted">$26</td>
+              <td class="right gold">$79</td>
+              <td class="right margin-good">67.1%</td>
+              <td class="right">$208</td>
+              <td><span class="badge in">In Stock</span></td>
+            </tr>
+            <tr class="low">
+              <td class="mono">AL-AMBSS-PND-004</td>
+              <td><div class="product-cell"><div class="thumb amber">A</div>Amber Halo Pendant</div></td>
+              <td class="muted">Pendants</td>
+              <td class="right">3</td>
+              <td class="right muted">$35</td>
+              <td class="right gold">$99</td>
+              <td class="right margin-good">64.6%</td>
+              <td class="right">$105</td>
+              <td><span class="badge low">Low Stock</span></td>
+            </tr>
+            <tr class="out">
+              <td class="mono">AL-LARGO-NCK-005</td>
+              <td><div class="product-cell"><div class="thumb gold">G</div>Larimar Gold Necklace</div></td>
+              <td class="muted">Necklaces</td>
+              <td class="right">0</td>
+              <td class="right muted">$95</td>
+              <td class="right gold">$279</td>
+              <td class="right margin-good">66.0%</td>
+              <td class="right">$0</td>
+              <td><span class="badge out">Sold Out</span></td>
+            </tr>
+            <tr class="normal">
+              <td class="mono">AL-BAMSS-PND-006</td>
+              <td><div class="product-cell"><div class="thumb bamber">B</div>Blue Amber Pendant</div></td>
+              <td class="muted">Pendants</td>
+              <td class="right">7</td>
+              <td class="right muted">$48</td>
+              <td class="right gold">$159</td>
+              <td class="right margin-good">69.8%</td>
+              <td class="right">$336</td>
+              <td><span class="badge in">In Stock</span></td>
+            </tr>
+            <tr class="normal">
+              <td class="mono">AL-LARSS-BRC-007</td>
+              <td><div class="product-cell"><div class="thumb larimar">L</div>Larimar Cuff Bracelet</div></td>
+              <td class="muted">Bracelets</td>
+              <td class="right">14</td>
+              <td class="right muted">$38</td>
+              <td class="right gold">$109</td>
+              <td class="right margin-good">65.1%</td>
+              <td class="right">$532</td>
+              <td><span class="badge in">In Stock</span></td>
+            </tr>
+            <tr class="low">
+              <td class="mono">AL-AMBSS-RNG-008</td>
+              <td><div class="product-cell"><div class="thumb amber">A</div>Amber Solitaire Ring</div></td>
+              <td class="muted">Rings</td>
+              <td class="right">1</td>
+              <td class="right muted">$30</td>
+              <td class="right gold">$89</td>
+              <td class="right margin-good">66.3%</td>
+              <td class="right">$30</td>
+              <td><span class="badge low">Low Stock</span></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(14,58,84,0.55);">Totals</td>
+              <td class="right">50</td>
+              <td></td>
+              <td></td>
+              <td class="right">65.3%</td>
+              <td class="right">$1,865</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- What you'd see in the Dashboard tab -->
+      <h2 style="margin-top: 48px;">Dashboard tab — same data, different view</h2>
+      <div class="legend" style="border-left-color: var(--larimar-mid);">
+        Sister tab to Inventory. Pulls the same products and joins them with paid orders to show 7-day / 30-day revenue and gross profit.
+      </div>
+
+      <div class="kpis" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="kpi"><div class="label">Total Products</div><div class="value">8</div></div>
+        <div class="kpi"><div class="label">Units in Stock</div><div class="value">50</div></div>
+        <div class="kpi"><div class="label">Inventory Value</div><div class="value">$1,865</div></div>
+        <div class="kpi"><div class="label">Potential Revenue</div><div class="value">$5,370</div></div>
+        <div class="kpi good"><div class="label">Avg Margin %</div><div class="value">65.3%</div></div>
+        <div class="kpi warn"><div class="label">Low Stock</div><div class="value">2</div></div>
+        <div class="kpi bad"><div class="label">Out of Stock</div><div class="value">1</div></div>
+        <div class="kpi"><div class="label">Paid Orders</div><div class="value">0</div></div>
+      </div>
+
+      <div class="kpis" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="kpi"><div class="label">Revenue (7d)</div><div class="value">$0</div></div>
+        <div class="kpi"><div class="label">Revenue (30d)</div><div class="value">$0</div></div>
+        <div class="kpi good"><div class="label">Gross Profit (7d)</div><div class="value">$0</div></div>
+        <div class="kpi good"><div class="label">Gross Profit (30d)</div><div class="value">$0</div></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div class="kpi">
+          <div class="label" style="margin-bottom: 12px;">Margin by Stone</div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-ui); font-size: 12px;">
+            <div><div style="display: flex; justify-content: space-between;"><span>Blue Amber</span><span style="color: rgba(14,58,84,0.6);">69.8% · 7 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 100%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Amber</span><span style="color: rgba(14,58,84,0.6);">65.4% · 12 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 94%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Larimar</span><span style="color: rgba(14,58,84,0.6);">63.5% · 31 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 91%; background: #157f3f; border-radius: 3px;"></div></div></div>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="label" style="margin-bottom: 12px;">Margin by Metal</div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-ui); font-size: 12px;">
+            <div><div style="display: flex; justify-content: space-between;"><span>Sterling Silver</span><span style="color: rgba(14,58,84,0.6);">65.1% · 50 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 100%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Gold</span><span style="color: rgba(14,58,84,0.6);">66.0% · 0 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 0%; background: #157f3f; border-radius: 3px;"></div></div></div>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="label" style="margin-bottom: 12px;">Margin by Category</div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-ui); font-size: 12px;">
+            <div><div style="display: flex; justify-content: space-between;"><span>Pendants</span><span style="color: rgba(14,58,84,0.6);">68.0% · 15 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 100%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Necklaces</span><span style="color: rgba(14,58,84,0.6);">66.0% · 0 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 0%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Rings</span><span style="color: rgba(14,58,84,0.6);">66.3% · 1 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 1%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Bracelets</span><span style="color: rgba(14,58,84,0.6);">65.1% · 14 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 28%; background: #157f3f; border-radius: 3px;"></div></div></div>
+            <div><div style="display: flex; justify-content: space-between;"><span>Earrings</span><span style="color: rgba(14,58,84,0.6);">62.4% · 20 u</span></div><div style="height: 6px; background: var(--cream-dark); border-radius: 3px; margin-top: 3px;"><div style="height: 100%; width: 40%; background: #157f3f; border-radius: 3px;"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <div class="kpi" style="background: #fff;">
+          <div class="label" style="margin-bottom: 14px;">Low Stock Alerts</div>
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-family: var(--font-ui); font-size: 13px;">
+            <li style="display: flex; justify-content: space-between; align-items: center;">
+              <span><span style="font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: rgba(14,58,84,0.5); margin-right: 12px;">AL-LARGO-NCK-005</span>Larimar Gold Necklace</span>
+              <span class="badge out">0 in stock</span>
+            </li>
+            <li style="display: flex; justify-content: space-between; align-items: center;">
+              <span><span style="font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: rgba(14,58,84,0.5); margin-right: 12px;">AL-AMBSS-RNG-008</span>Amber Solitaire Ring</span>
+              <span class="badge low">1 in stock</span>
+            </li>
+            <li style="display: flex; justify-content: space-between; align-items: center;">
+              <span><span style="font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: rgba(14,58,84,0.5); margin-right: 12px;">AL-AMBSS-PND-004</span>Amber Halo Pendant</span>
+              <span class="badge low">3 in stock</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showView(v) {
+      document.getElementById('grid-view').style.display = (v === 'grid') ? '' : 'none';
+      document.getElementById('table-view').style.display = (v === 'table') ? '' : 'none';
+      document.getElementById('grid-btn').classList.toggle('active', v === 'grid');
+      document.getElementById('table-btn').classList.toggle('active', v === 'table');
+    }
+  </script>
+</body>
+</html>
