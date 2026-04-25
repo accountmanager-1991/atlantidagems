@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logo Everywhere — Ambar & Larimar Shop</title>
+<link rel="stylesheet" href="/brand-preview.css">
+<style>
+  /* Page-specific */
+  .legend { font-family: var(--font-ui); font-size: 12px; color: var(--gold-deep); letter-spacing: 0.1em; padding: 14px 18px; background: var(--cream-dark); border-radius: 4px; border-left: 3px solid var(--gold); margin-bottom: 28px; }
+  .checker {
+    background-image:
+      linear-gradient(45deg, #d8d3c4 25%, transparent 25%),
+      linear-gradient(-45deg, #d8d3c4 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #d8d3c4 75%),
+      linear-gradient(-45deg, transparent 75%, #d8d3c4 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, 10px 0;
+    background-color: #ffffff;
+  }
+  .surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .surface { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 16px; }
+  .surface img { width: 76%; height: 76%; }
+  .surface-cream { background: var(--cream); border: 1px solid rgba(201,168,76,0.25); }
+  .surface-black { background: #000; }
+  .surface-navy { background: var(--navy); }
+  .surface-larimar { background: var(--larimar-deep); }
+  .surface-gold { background: var(--gold-light); }
+  .surface-photo-1 { background-image: linear-gradient(135deg, var(--midnight) 0%, var(--larimar-deep) 50%, var(--larimar-mid) 100%); }
+  .surface-photo-2 { background-image: linear-gradient(135deg, #6B3000 0%, #D06800 50%, #FFD074 100%); }
+  .surface-stock-photo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="g" cx="30%25" cy="40%25" r="80%25"><stop offset="0%25" stop-color="%23F5DEB3"/><stop offset="100%25" stop-color="%238A6418"/></radialGradient></defs><rect width="100" height="100" fill="url(%23g)"/></svg>'); background-size: cover; }
+  .surface-label { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; text-align: center; margin-top: 6px; font-weight: 500; }
+  .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .file-tile { background: var(--cream-dark); border-radius: 4px; padding: 10px; text-align: center; }
+  .file-tile img { width: 100%; max-width: 100px; height: auto; aspect-ratio: 1/1; object-fit: contain; }
+  .file-tile .name { font-family: var(--font-ui); font-size: 9.5px; color: var(--navy); margin-top: 6px; font-weight: 500; word-break: break-all; }
+  .file-tile .size { font-family: var(--font-ui); font-size: 8.5px; color: var(--gold-deep); margin-top: 2px; letter-spacing: 0.05em; }
+  .pill { display: inline-block; padding: 2px 8px; font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 12px; background: var(--larimar-mid); color: var(--cream); font-weight: 600; margin-left: 8px; }
+</style>
+</head>
+<body>
+  <h1>Logo Everywhere</h1>
+  <div class="sub">Concept A · Caribbean Sun · Every place you'll need it</div>
+
+  <div class="legend">
+    <strong>About transparency:</strong> the grey-square checkered pattern in your image viewer means the background is <strong>transparent</strong> — when you upload these PNGs to Instagram, Etsy, your website, or any other surface, the platform's own background will show through. That's exactly what you want. Below, the same file is shown on 8 different backgrounds to prove it.
+  </div>
+
+  <h2>Same logo on 8 backgrounds <span class="pill">Transparency proof</span></h2>
+  <div class="card">
+    <div class="surfaces">
+      <div><div class="surface checker"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">Transparent (default)</div></div>
+      <div><div class="surface surface-cream"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On cream (site)</div></div>
+      <div><div class="surface surface-black"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On pure black</div></div>
+      <div><div class="surface surface-navy"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On brand navy</div></div>
+      <div><div class="surface surface-larimar"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On larimar deep</div></div>
+      <div><div class="surface surface-gold"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On gold</div></div>
+      <div><div class="surface surface-photo-1"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On dark photo</div></div>
+      <div><div class="surface surface-photo-2"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"></div><div class="surface-label">On warm gradient</div></div>
+    </div>
+  </div>
+
+  <h2>01 · Master vector files <span class="pill">use first</span></h2>
+  <div class="card">
+    <p class="note">SVG = perfect at every size. Use these wherever the platform accepts vector files (your website, Figma, Illustrator, Inkscape, modern email clients, modern print presses).</p>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/01-MASTER-VECTOR/logo-mark.svg"><div class="name"><a class="dl" href="/logo-everywhere/01-MASTER-VECTOR/logo-mark.svg" download>logo-mark.svg</a></div><div class="size">SVG · vector</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/01-MASTER-VECTOR/logo-horizontal.svg"><div class="name"><a class="dl" href="/logo-everywhere/01-MASTER-VECTOR/logo-horizontal.svg" download>logo-horizontal.svg</a></div><div class="size">SVG · vector</div></div>
+    </div>
+  </div>
+
+  <h2>02 · Profile pictures — every platform, 3 sizes <span class="pill">all transparent</span></h2>
+  <div class="card">
+    <p class="note">Each platform gets <strong>spec size</strong> (recommended/required) + <strong>1080 HD</strong> (modern phones) + <strong>1920 MAX</strong> (future-proof retina). All transparent — uploads cleanly to any background. <strong>Etsy is the only strict exception</strong> (rejects anything other than 500×500).</p>
+
+    <h3 style="margin-top: 24px;">Universal — drop on any platform</h3>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/universal-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/universal-1080.png" download>universal-1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/universal-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/universal-1920.png" download>universal-1920</a></div><div class="size">MAX</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/universal-2048.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/universal-2048.png" download>universal-2048</a></div><div class="size">future-proof</div></div>
+    </div>
+
+    <h3 style="margin-top: 24px;">Major platforms</h3>
+    <div class="file-grid">
+      <!-- Instagram -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-320.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-320.png" download>Instagram 320</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-1080.png" download>Instagram 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/instagram-profile-1920.png" download>Instagram 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- Facebook -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-512.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-512.png" download>Facebook 512</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-1080.png" download>Facebook 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/facebook-profile-1920.png" download>Facebook 1920</a></div><div class="size">MAX ★</div></div>
+
+      <!-- TikTok -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-400.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-400.png" download>TikTok 400</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-1080.png" download>TikTok 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/tiktok-profile-1920.png" download>TikTok 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- X / Twitter -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-400.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-400.png" download>X 400</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-1080.png" download>X 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/x-twitter-profile-1920.png" download>X 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- Threads -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-320.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-320.png" download>Threads 320</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-1080.png" download>Threads 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/threads-profile-1920.png" download>Threads 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- LinkedIn Page -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-400.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-400.png" download>LinkedIn Page 400</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-1080.png" download>LinkedIn Page 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/linkedin-page-1920.png" download>LinkedIn Page 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- Pinterest -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-400.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-400.png" download>Pinterest 400</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-1080.png" download>Pinterest 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/pinterest-profile-1920.png" download>Pinterest 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- YouTube -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-800.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-800.png" download>YouTube 800</a></div><div class="size">spec (min)</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-1080.png" download>YouTube 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/youtube-channel-1920.png" download>YouTube 1920</a></div><div class="size">MAX ★</div></div>
+
+      <!-- Etsy (strict) -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/etsy-shop-500.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/etsy-shop-500.png" download>Etsy 500 ★</a></div><div class="size">strict only</div></div>
+
+      <!-- WhatsApp Business -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-640.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-640.png" download>WhatsApp 640</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-1080.png" download>WhatsApp 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/whatsapp-business-1920.png" download>WhatsApp 1920</a></div><div class="size">MAX</div></div>
+
+      <!-- Google Business -->
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/google-business-720.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/google-business-720.png" download>Google Bus 720</a></div><div class="size">spec</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/google-business-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/google-business-1080.png" download>Google Bus 1080</a></div><div class="size">HD ★</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/google-business-1920.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/google-business-1920.png" download>Google Bus 1920</a></div><div class="size">MAX</div></div>
+    </div>
+
+    <h3 style="margin-top: 24px;">Other platforms (Snapchat / Discord / Telegram / Reddit / BlueSky / Behance / Tumblr / Vimeo / Mastodon)</h3>
+    <p class="note">Same pattern: each has spec + 1080 + 1920 in <code>02-PROFILE-PICTURES/</code>. Showing one per platform here.</p>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/snapchat-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/snapchat-1080.png" download>Snapchat 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/discord-server-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/discord-server-1080.png" download>Discord 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/telegram-channel-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/telegram-channel-1080.png" download>Telegram 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/reddit-community-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/reddit-community-1080.png" download>Reddit 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/bluesky-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/bluesky-profile-1080.png" download>BlueSky 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/behance-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/behance-profile-1080.png" download>Behance 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/tumblr-blog-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/tumblr-blog-1080.png" download>Tumblr 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/vimeo-channel-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/vimeo-channel-1080.png" download>Vimeo 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/mastodon-profile-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/mastodon-profile-1080.png" download>Mastodon 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/facebook-group-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/facebook-group-1080.png" download>FB Group 1080</a></div><div class="size">HD</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/02-PROFILE-PICTURES/linkedin-personal-1080.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/02-PROFILE-PICTURES/linkedin-personal-1080.png" download>LinkedIn Personal 1080</a></div><div class="size">HD</div></div>
+    </div>
+    <p class="note" style="margin-top:14px;">★ = recommended size for that platform. Total: <strong>67 PNG files</strong> across 22 platforms + 3 universal sizes, all transparent.</p>
+  </div>
+
+  <h2>03 · Web favicons</h2>
+  <div class="card">
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/favicon-16.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/favicon-16.png" download>favicon-16</a></div><div class="size">browser tab</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/favicon-32.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/favicon-32.png" download>favicon-32</a></div><div class="size">retina tab</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/favicon-48.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/favicon-48.png" download>favicon-48</a></div><div class="size">windows</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/favicon-96.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/favicon-96.png" download>favicon-96</a></div><div class="size">edge / desktop</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/favicon-192.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/favicon-192.png" download>favicon-192</a></div><div class="size">android / pwa</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/03-FAVICONS-WEB/apple-touch-icon-180.png"><div class="name"><a class="dl" href="/logo-everywhere/03-FAVICONS-WEB/apple-touch-icon-180.png" download>apple-touch</a></div><div class="size">ios home screen</div></div>
+    </div>
+  </div>
+
+  <h2>04 · App / PWA icons</h2>
+  <div class="card">
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/04-APP-ICONS/pwa-192.png"><div class="name"><a class="dl" href="/logo-everywhere/04-APP-ICONS/pwa-192.png" download>pwa-192</a></div><div class="size">192×192</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/04-APP-ICONS/pwa-512.png"><div class="name"><a class="dl" href="/logo-everywhere/04-APP-ICONS/pwa-512.png" download>pwa-512</a></div><div class="size">512×512</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/04-APP-ICONS/maskable-512.png"><div class="name"><a class="dl" href="/logo-everywhere/04-APP-ICONS/maskable-512.png" download>maskable</a></div><div class="size">android adaptive</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/04-APP-ICONS/ios-app-store-1024.png"><div class="name"><a class="dl" href="/logo-everywhere/04-APP-ICONS/ios-app-store-1024.png" download>iOS App Store</a></div><div class="size">1024×1024</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/04-APP-ICONS/android-play-store-512.png"><div class="name"><a class="dl" href="/logo-everywhere/04-APP-ICONS/android-play-store-512.png" download>Google Play</a></div><div class="size">512×512</div></div>
+    </div>
+  </div>
+
+  <h2>05 · Print / large displays</h2>
+  <div class="card">
+    <p class="note">Use the SVG for anything you can. PNG fallbacks here for printers that don't accept vector.</p>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/mark-512.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/mark-512.png" download>mark-512</a></div><div class="size">tags</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/mark-1024.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/mark-1024.png" download>mark-1024</a></div><div class="size">letterhead</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/mark-2048.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/mark-2048.png" download>mark-2048</a></div><div class="size">packaging</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/mark-4096.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/mark-4096.png" download>mark-4096</a></div><div class="size">posters</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/horizontal-1200.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/horizontal-1200.png" download>horizontal-1200</a></div><div class="size">stationery</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/05-PRINT-LARGE/horizontal-2400.png"><div class="name"><a class="dl" href="/logo-everywhere/05-PRINT-LARGE/horizontal-2400.png" download>horizontal-2400</a></div><div class="size">trade-show</div></div>
+    </div>
+  </div>
+
+  <h2>06 · Watermark overlay (55% opacity)</h2>
+  <div class="card">
+    <p class="note">For stamping product photos to discourage screenshot reuse. Place at 10–15% of photo width in a corner.</p>
+    <div class="file-grid">
+      <div class="file-tile checker"><img src="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-128.png"><div class="name"><a class="dl" href="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-128.png" download>wm-128</a></div><div class="size">small</div></div>
+      <div class="file-tile checker"><img src="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-256.png"><div class="name"><a class="dl" href="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-256.png" download>wm-256</a></div><div class="size">standard</div></div>
+      <div class="file-tile checker"><img src="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-512.png"><div class="name"><a class="dl" href="/logo-everywhere/06-WATERMARK-OVERLAY/watermark-512.png" download>wm-512</a></div><div class="size">large</div></div>
+    </div>
+  </div>
+
+  <h2>07 · Email signature</h2>
+  <div class="card">
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/07-EMAIL-SIGNATURE/email-signature-600.png"><div class="name"><a class="dl" href="/logo-everywhere/07-EMAIL-SIGNATURE/email-signature-600.png" download>email-sig-600</a></div><div class="size">standard</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/07-EMAIL-SIGNATURE/email-signature-900.png"><div class="name"><a class="dl" href="/logo-everywhere/07-EMAIL-SIGNATURE/email-signature-900.png" download>email-sig-900</a></div><div class="size">retina</div></div>
+    </div>
+  </div>
+
+  <h2>08 · Content stamps (solid)</h2>
+  <div class="card">
+    <p class="note">Solid (non-watermark) marks for stamping into Reels / TikToks / Pinterest pins / infographics.</p>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/08-CONTENT-STAMPS/stamp-small-128.png"><div class="name"><a class="dl" href="/logo-everywhere/08-CONTENT-STAMPS/stamp-small-128.png" download>stamp-128</a></div><div class="size">reel corner</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/08-CONTENT-STAMPS/stamp-medium-256.png"><div class="name"><a class="dl" href="/logo-everywhere/08-CONTENT-STAMPS/stamp-medium-256.png" download>stamp-256</a></div><div class="size">carousel</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/08-CONTENT-STAMPS/stamp-large-400.png"><div class="name"><a class="dl" href="/logo-everywhere/08-CONTENT-STAMPS/stamp-large-400.png" download>stamp-400</a></div><div class="size">infographic</div></div>
+    </div>
+  </div>
+
+  <h2>09 · Ultra-HD <span class="pill">max quality</span></h2>
+  <div class="card">
+    <p class="note">For billboards, packaging masters, archival reference. The 8192px version is enough for a 27-inch print at 300 DPI or a 91-inch banner at 90 DPI.</p>
+    <div class="file-grid">
+      <div class="file-tile"><img src="/logo-everywhere/09-ULTRA-HD/mark-4096.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/09-ULTRA-HD/mark-4096.png" download>mark-4096</a></div><div class="size">poster · 1.5 MB</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/09-ULTRA-HD/mark-6144.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/09-ULTRA-HD/mark-6144.png" download>mark-6144</a></div><div class="size">retail signage · 2.5 MB</div></div>
+      <div class="file-tile"><img src="/logo-everywhere/09-ULTRA-HD/mark-8192.png" loading="lazy"><div class="name"><a class="dl" href="/logo-everywhere/09-ULTRA-HD/mark-8192.png" download>mark-8192</a></div><div class="size">billboard · 4.1 MB</div></div>
+    </div>
+  </div>
+
+  <div class="gold-divider"><span>End of kit</span></div>
+
+  <div class="card">
+    <p class="note" style="margin-bottom: 8px;"><strong>All 51 files:</strong> SVG masters · 16 platform profile pics · 6 favicons · 5 app icons · 7 print sizes · 3 watermarks · 2 email signatures · 3 content stamps · 3 ultra-HD = <strong>51 transparent PNGs + 2 SVG masters</strong>.</p>
+    <p class="note" style="margin-bottom: 0;"><strong>Folder location:</strong> <code>brand-kit/LOGO-EVERYWHERE/</code> · regenerate anytime: <code>node scripts/build-logo-everywhere.mjs && node scripts/verify-and-upgrade-logos.mjs</code></p>
+  </div>
+</body>
+</html>

@@ -49,11 +49,15 @@
 | Cream White | `#FAF7F0` | Backgrounds |
 | Deep Dark | `#0A0A08` | Text, luxury contrast |
 
-### Existing Brand Assets
-- `atlantida-logo.svg` - Master vector logo
-- `atlantida-brand-kit.html` - Complete visual reference
-- `atlantida-business-card.pdf` - Print-ready (both sides, crop marks, bleed)
-- `atlantida-color-palette.pdf` - HEX/RGB/CMYK reference
+### Brand Assets (2026-04 redesign — Concept A "Caribbean Sun")
+- `brand-kit/01-LOGOS/final-2026-04/logo-mark.svg` — Primary seal (circular, used everywhere)
+- `brand-kit/01-LOGOS/final-2026-04/logo-horizontal.svg` — Wordmark + seal lockup
+- `brand-kit/01-LOGOS/final-2026-04/png/` — 23 PNG sizes (32–2048px) + favicons
+- `brand-kit/02-SOCIAL-2026-04/` — Banners (FB/X/LinkedIn/YouTube/Pinterest/Etsy) + IG templates, light + dark
+- `brand-kit/03-BUSINESS-CARD-2026-04/` — Print-ready cards (3.5"×2", 1/8" bleed, 300 DPI)
+- `brand-kit/00-BRAND-GUIDE/Ambar-Larimar-Brand-Guide.pdf` — Full brand book
+- `brand-kit/google-drive-ready/` — Per-platform folders, drag-into-Drive structure
+- See `docs/BRAND.md` for the complete asset map and regen commands
 
 ---
 

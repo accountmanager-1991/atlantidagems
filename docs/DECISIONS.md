@@ -1,7 +1,109 @@
 # Architecture & Design Decisions
 
 **Project:** Ambar & Larimar Shop
-**Last Updated:** 2026-03-12 (Session 13)
+**Last Updated:** 2026-04-24 (Session 14)
+
+---
+
+## D021: Brand Identity Redesign — "Caribbean Sun" Concept A + Dual-Theme Kit
+
+**Date:** 2026-04-24
+**Status:** Implemented
+
+**Context:** Original "Atlantida Gems" brand was generic. Owner needed an attention-grabbing identity rooted in Dominican Republic + Larimar + Amber, with a complete asset kit ready for every social channel + print, in both light and dark variants.
+
+**Decision:** Adopt **Concept A "Caribbean Sun"** — circular seal with amber sunburst on top, larimar waves below, real DR silhouette at center with three map pins (larimar at Barahona, amber at Puerto Plata, gold star at Santo Domingo), gold horizon line, double gold ring outline. Build the full asset kit as a code-generated system.
+
+### Why Concept A (vs. B "Drop Monogram" or C "Taíno Sun")
+- Most attention-grabbing at small sizes (profile pic, favicon)
+- Tells the brand origin story in one glance: sun, sea, island, two stones, pinned to where they're mined
+- Easy to drop on any background (cream, navy, photos)
+- Owner picked it specifically (logged in conversation)
+
+### Why use a real DR outline (not a stylized silhouette)
+- Stylized hand-drawn shapes were rejected by owner — "doesn't look like Dominican Republic"
+- Sourced traced outline from open-source [mapsicon](https://github.com/djaiss/mapsicon) project (potrace-derived from accurate map data)
+- Embedded as nested SVG with `vector-effect="non-scaling-stroke"` so the outline stays crisp at any size
+
+### Why dual-theme (light + dark) for every social asset
+- Different platforms have different surrounding UIs
+- "Light" (cream background) reads luxury / editorial
+- "Dark" (navy radial gradient) reads bolder / premium
+- Owner can A/B test which theme converts better per platform
+
+### Why generate everything from code (not Photoshop/Figma)
+- Updating a brand color or the logo means re-running scripts, not redoing 60+ hand-edited files
+- Adding a new platform / size = 2 lines of config
+- Reproducible — anyone can rebuild the kit from `npm install && node scripts/...`
+- The brand SOURCE OF TRUTH lives in `globals.css` + `logo-mark.svg` + the script `P` palette object — change one of those, regenerate, done
+
+### Architecture
+- `brand-kit/01-LOGOS/final-2026-04/` — master SVGs + 23 PNG sizes
+- `brand-kit/02-SOCIAL-2026-04/` — banners + IG templates (light + dark)
+- `brand-kit/03-BUSINESS-CARD-2026-04/` — print-ready cards (300 DPI, bleed, crop marks)
+- `brand-kit/00-BRAND-GUIDE/` — 8-page PDF brand book
+- `brand-kit/google-drive-ready/` — per-platform folders ready to drag into Drive
+- `brand-kit/LOGO-EVERYWHERE/` — consolidated folder with per-use-case named copies (Instagram, FB, Etsy, favicons, app icons, watermarks, etc.) — every file you'd need across the brand's lifetime, drag-and-drop ready
+
+### 5 generator scripts (in `scripts/`)
+- `export-logo-pngs.mjs` — every standard PNG size + favicons from the master SVG
+- `generate-social-kit.mjs` — banners + IG templates + Etsy assets, light + dark
+- `generate-business-card.mjs` — print-ready cards with crop marks
+- `generate-brand-guide-pdf.mjs` — 8-page brand book using pdfkit
+- `organize-kit-for-drive.mjs` — rebuilds Drive-ready per-platform folders
+- `build-logo-everywhere.mjs` — consolidated "every place you need the logo" folder
+
+### Tooling
+- `sharp` (devDep) — SVG → PNG rasterization, used by the four PNG-emitting scripts
+- `pdfkit` (devDep) — PDF generation for the brand guide
+- Both work cross-platform; sharp is libvips-based, pdfkit is pure JS
+
+### Trade-offs
+- pdfkit can't load Google Fonts (Cinzel/Cormorant) at runtime, so the brand guide PDF substitutes Helvetica-Bold/Times. Visual approximation, not pixel-perfect type. If pixel-perfect typography is needed, switch to puppeteer (heavier — downloads Chromium).
+- Old `brand-kit/01-LOGOS/{dark-background, white-background, icon-only}/` folders left in place to avoid breaking external references (social-banners.html, prior brand kit zips). Will clean up in a future session if no inbound links surface.
+
+### Site alignment (this release also)
+- Header + Footer now use the new logo mark (`/images/logos/logo-mark-2026-04.svg`)
+- Favicon + Apple touch icon + 192px PWA icon wired into `metadata.icons` in `layout.tsx`
+- OpenGraph image rebuilt with the logo + brand colors (was text-only)
+- Tailwind palette gained `--color-gold-deep` (#8A6418) for parity with the brand kit
+- Brand-aligned preview pages (`/logo-concepts.html`, `/logo-kit.html`, `/social-kit.html`) load the actual brand fonts via Google Fonts and use a shared `public/brand-preview.css`
+
+---
+
+## D020: Inventory + P&L Module — SKU, Cost Breakdown, Stock Decrement
+
+**Date:** 2026-04-24
+**Status:** Implemented
+
+**Context:** Owner needed operational visibility: inventory on hand, margin per product, and auto-decrement on sales. Pre-existing schema had `stock_status` tag but no numeric count, and no cost fields — so no real profit tracking was possible.
+
+**Decision:** Add a 4-field cost breakdown (material, labor, packaging, shipping) per product, a numeric `stock_quantity` column, an auto-generated SKU system, a dedicated Inventory tab, and a Dashboard tab with live KPIs. Auto-decrement stock in the Stripe webhook.
+
+**SKU format:** `AL-{STONE}{METAL}-{CAT}-{NNN}`
+- Stones: `LAR` (larimar), `AMB` (amber), `BAM` (blue-amber)
+- Metals: `SS` (sterling-silver), `GO` (gold), `GP` (gold-plated)
+- Categories: `EAR`, `PND`, `NCK`, `RNG`, `BRC`
+- Sequence: zero-padded 3-digit counter per prefix (e.g. `AL-LARSS-PND-001`)
+
+**Why 4 cost fields (not 1):** Jewelry margins depend heavily on labor and shipping (especially DR → US). A single lump-sum "cost" field hides variance and makes it impossible to diagnose why certain SKUs underperform. Keeping them separate lets the owner see "packaging cost is eating margin on the $69 tier" at a glance.
+
+**Why keep 4 image columns (not normalize to a `product_images` table):** Schema change would break cached queries and the shop UI. 4 images is still the product-page cap. Revisit only if the owner needs 5+.
+
+**Architecture:**
+- `src/lib/sku.ts` — codes + `generateSku()` queries DB for max existing, increments
+- `src/lib/admin-constants.ts` — shared categories, labels, `totalCost()`, `marginPct()`, `fmtUSD()` helpers
+- `src/components/admin/InventoryManager.tsx` — sortable table, CSV export, row totals
+- `src/components/admin/DashboardPanel.tsx` — KPIs, margin breakdowns (weighted by revenue), 7d/30d gross profit using line-item COGS lookup
+- `src/app/api/webhook/stripe/route.ts` — decrements `stock_quantity` per line item, auto-sets `stock_status` to `low-stock` (<=3) or `sold-out` (0)
+- DB migration: `ALTER TABLE products ADD COLUMN IF NOT EXISTS` for all 6 new columns + unique SKU index (partial, excluding empty)
+
+**Stock decrement behavior:** `GREATEST(0, stock_quantity - qty)` prevents negative stock. Status transitions are conservative — only downgrades to `low-stock` / `sold-out`, never upgrades (so a manual `made-to-order` or manually-set status isn't clobbered).
+
+**Trade-offs:**
+- No per-order COGS snapshot — if a product's cost fields change later, historical profit numbers will drift. Acceptable for now; revisit if accounting needs immutable ledger.
+- In-memory margin calculation, not denormalized — slight CPU cost per render, but keeps the data model simple and avoids cache invalidation.
+- SKU is not regenerated on category/stone/metal change — owner must click Regenerate manually. Intentional, because changing stone type after a SKU is printed on a hang tag would be a real-world data integrity hit.
 
 ---
 

@@ -61,12 +61,10 @@
 
 ---
 
-### TD012: No inventory/stock management
-
-**Severity:** Medium
-**Impact:** Stock status is stored in DB but never decremented on purchase. Risk of overselling if manual inventory updates are forgotten.
-**Fix:** Decrement stock quantity in Stripe webhook after successful payment. Add stock check before checkout.
-**Files:** `src/app/api/webhook/stripe/route.ts`, `src/app/api/checkout/route.ts`, `src/lib/db.ts`
+### ~~TD012: No inventory/stock management~~ — RESOLVED 2026-04-24
+**Was:** Stock status was a tag only, never decremented on purchase.
+**Fix:** Added numeric `stock_quantity` column. Stripe webhook now decrements per line item via `GREATEST(0, stock_quantity - qty)` and auto-flags `low-stock` (<=3) or `sold-out` (0). See D020.
+**Remaining:** Pre-checkout stock validation (prevent adding more than available to cart) — tracked separately if needed.
 
 ---
 

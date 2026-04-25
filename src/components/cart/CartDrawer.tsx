@@ -1,8 +1,7 @@
 "use client";
 
-import { useCartStore, generateOrderMessage } from "@/lib/cart-store";
+import { useCartStore } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
-import { BRAND } from "@/lib/constants";
 import { useApp } from "@/components/providers/AppProvider";
 import Link from "next/link";
 
@@ -19,8 +18,6 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const total = useCartStore((s) => s.total());
 
   if (!open) return null;
-
-  const mailtoUrl = `mailto:${BRAND.email}?subject=Order%20from%20Ambar%20%26%20Larimar%20Shop&body=${generateOrderMessage(items)}`;
 
   return (
     <>
@@ -170,12 +167,6 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             >
               {t.checkout?.payNow || "Proceed to Checkout"}
             </Link>
-            <a
-              href={mailtoUrl}
-              className="block w-full text-center mt-3 py-3 border border-gold/30 text-ocean hover:bg-gold/10 rounded font-ui text-sm tracking-wider uppercase transition-colors"
-            >
-              {t.checkout?.orEmail || "Or Order via Email"}
-            </a>
           </div>
         )}
       </div>

@@ -54,16 +54,32 @@ export const metadata: Metadata = {
     title: `${BRAND.name} — ${BRAND.tagline}`,
     description: BRAND.description,
     locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${BRAND.name} — ${BRAND.tagline}`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${BRAND.name} — ${BRAND.tagline}`,
     description: BRAND.description,
+    images: ["/og-image.png"],
   },
   verification: {
     other: {
       "p:domain_verify": "4e54d4f9b0f84b8392f6b4fa9dc7d197",
     },
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
@@ -88,6 +104,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${cinzel.variable} ${cormorant.variable} ${montserrat.variable} antialiased`}
+        suppressHydrationWarning
       >
         <AppProvider>
           <Header />

@@ -1,12 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
 import OrdersManager from "./OrdersManager";
+import InventoryManager from "./InventoryManager";
+import DashboardPanel from "./DashboardPanel";
+import {
+  AdminLang,
+  CATEGORIES,
+  STONE_TYPES,
+  METAL_TYPES,
+  STOCK_STATUSES,
+  CATEGORY_LABELS,
+  STONE_LABELS,
+  METAL_LABELS,
+  STOCK_LABELS,
+  totalCost,
+  marginPct,
+  fmtUSD,
+} from "@/lib/admin-constants";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbProduct = Record<string, any>;
 
-type Lang = "en" | "es";
+const IMAGE_FIELDS = ["image_main", "image2", "image3", "image4"] as const;
+type ImageField = typeof IMAGE_FIELDS[number];
+
+type Tab = "dashboard" | "products" | "inventory" | "orders";
 
 const t = {
   en: {
@@ -17,7 +37,10 @@ const t = {
     title: "Ambar & Larimar Admin",
     viewSite: "View Site",
     logout: "Logout",
+    dashboard: "Dashboard",
     products: "Products",
+    inventory: "Inventory",
+    orders: "Orders",
     productsInDb: "products in database",
     initDb: "Initialize Database",
     addProduct: "+ Add Product",
@@ -31,12 +54,16 @@ const t = {
     cancel: "Cancel",
     name: "Name",
     slug: "Slug",
+    sku: "SKU",
+    skuHint: "Auto-generated from stone/metal/category",
+    regenerateSku: "Regenerate",
     retailPrice: "Retail Price",
     wholesalePrice: "Wholesale Price",
     category: "Category",
     stoneType: "Stone Type",
     metalType: "Metal Type",
     stockStatus: "Stock Status",
+    stockQty: "Stock Qty",
     weight: "Weight (grams)",
     dimensions: "Dimensions",
     stoneOrigin: "Stone Origin",
@@ -52,12 +79,12 @@ const t = {
     newArrival: "New Arrival",
     visible: "Visible",
     images: "Images",
-    mainThumbnail: "Main (Thumbnail)",
-    noImage: "No image",
-    thumbnail: "Thumbnail",
-    clickSetThumbnail: "Click to set as thumbnail",
-    upload: "Upload",
+    mainPhoto: "Main photo (thumbnail)",
+    uploadPhotos: "Upload photos",
     uploading: "Uploading...",
+    dropHere: "or drop images here",
+    setAsMain: "Set as main",
+    mainBadge: "Main",
     pasteUrl: "Or paste URL",
     createProduct: "Create Product",
     saveChanges: "Save Changes",
@@ -78,10 +105,16 @@ const t = {
     dbInitialized: "Database initialized!",
     dbInitFailed: "Failed to initialize database. Check DATABASE_URL env var.",
     uploadFailed: "Upload failed",
-    uploadFailedCloudinary: "Upload failed. Check Cloudinary env vars.",
     enterNameFirst: "Enter a product name first",
     descriptionsGenerated: "Descriptions generated!",
     generateFailed: "Failed to generate descriptions",
+    costs: "Costs & Margin",
+    materialCost: "Material",
+    laborCost: "Labor",
+    packagingCost: "Packaging",
+    shippingCostField: "Shipping",
+    totalCost: "Total Cost",
+    margin: "Margin",
   },
   es: {
     adminLogin: "Inicio de Sesion Admin",
@@ -91,7 +124,10 @@ const t = {
     title: "Ambar & Larimar Admin",
     viewSite: "Ver Sitio",
     logout: "Salir",
+    dashboard: "Panel",
     products: "Productos",
+    inventory: "Inventario",
+    orders: "Pedidos",
     productsInDb: "productos en la base de datos",
     initDb: "Inicializar Base de Datos",
     addProduct: "+ Agregar Producto",
@@ -105,12 +141,16 @@ const t = {
     cancel: "Cancelar",
     name: "Nombre",
     slug: "Slug",
+    sku: "SKU",
+    skuHint: "Auto-generado (piedra/metal/categoria)",
+    regenerateSku: "Regenerar",
     retailPrice: "Precio Retail",
     wholesalePrice: "Precio Mayoreo",
     category: "Categoria",
     stoneType: "Tipo de Piedra",
     metalType: "Tipo de Metal",
     stockStatus: "Estado de Stock",
+    stockQty: "Cant. en Stock",
     weight: "Peso (gramos)",
     dimensions: "Dimensiones",
     stoneOrigin: "Origen de la Piedra",
@@ -126,12 +166,12 @@ const t = {
     newArrival: "Nuevo",
     visible: "Visible",
     images: "Imagenes",
-    mainThumbnail: "Principal (Miniatura)",
-    noImage: "Sin imagen",
-    thumbnail: "Miniatura",
-    clickSetThumbnail: "Clic para usar como miniatura",
-    upload: "Subir",
+    mainPhoto: "Foto principal (miniatura)",
+    uploadPhotos: "Subir fotos",
     uploading: "Subiendo...",
+    dropHere: "o arrastra imagenes aqui",
+    setAsMain: "Usar como principal",
+    mainBadge: "Principal",
     pasteUrl: "O pegar URL",
     createProduct: "Crear Producto",
     saveChanges: "Guardar Cambios",
@@ -152,39 +192,27 @@ const t = {
     dbInitialized: "Base de datos inicializada!",
     dbInitFailed: "Error al inicializar. Verifica la variable DATABASE_URL.",
     uploadFailed: "Error al subir",
-    uploadFailedCloudinary: "Error al subir. Verifica las variables de Cloudinary.",
     enterNameFirst: "Ingresa un nombre primero",
     descriptionsGenerated: "Descripciones generadas!",
     generateFailed: "Error al generar descripciones",
+    costs: "Costos y Margen",
+    materialCost: "Material",
+    laborCost: "Mano de Obra",
+    packagingCost: "Empaque",
+    shippingCostField: "Envio",
+    totalCost: "Costo Total",
+    margin: "Margen",
   },
 };
 
-const CATEGORIES = ["earrings", "pendants", "necklaces", "rings", "bracelets"];
-const CATEGORY_LABELS: Record<Lang, Record<string, string>> = {
-  en: { earrings: "Earrings", pendants: "Pendants", necklaces: "Necklaces", rings: "Rings", bracelets: "Bracelets" },
-  es: { earrings: "Aretes", pendants: "Dijes", necklaces: "Collares", rings: "Anillos", bracelets: "Pulseras" },
-};
-const STONE_TYPES = ["larimar", "amber", "blue-amber"];
-const STONE_LABELS: Record<Lang, Record<string, string>> = {
-  en: { larimar: "Larimar", amber: "Amber", "blue-amber": "Blue Amber" },
-  es: { larimar: "Larimar", amber: "Ambar", "blue-amber": "Ambar Azul" },
-};
-const METAL_TYPES = ["sterling-silver", "gold", "gold-plated"];
-const METAL_LABELS: Record<Lang, Record<string, string>> = {
-  en: { "sterling-silver": "Sterling Silver", gold: "Gold", "gold-plated": "Gold Plated" },
-  es: { "sterling-silver": "Plata 925", gold: "Oro", "gold-plated": "Banado en Oro" },
-};
-const STOCK_STATUSES = ["in-stock", "low-stock", "sold-out", "made-to-order"];
-const STOCK_LABELS: Record<Lang, Record<string, string>> = {
-  en: { "in-stock": "In Stock", "low-stock": "Low Stock", "sold-out": "Sold Out", "made-to-order": "Made to Order" },
-  es: { "in-stock": "En Stock", "low-stock": "Poco Stock", "sold-out": "Agotado", "made-to-order": "Bajo Pedido" },
-};
-
 const EMPTY_PRODUCT: DbProduct = {
-  name: "", slug: "", description: "", short_description: "",
+  name: "", slug: "", sku: "",
+  description: "", short_description: "",
   description_es: "", short_description_es: "",
   description_de: "", short_description_de: "",
   price_retail: 0, price_wholesale: 0, min_wholesale_qty: 1,
+  material_cost: 0, labor_cost: 0, packaging_cost: 0, shipping_cost: 0,
+  stock_quantity: 0,
   category: "pendants", stone_type: "larimar", metal_type: "sterling-silver",
   image_main: "", image2: "", image3: "", image4: "",
   stock_status: "in-stock", featured: false, wholesale_eligible: true, new_arrival: false,
@@ -193,7 +221,7 @@ const EMPTY_PRODUCT: DbProduct = {
 };
 
 export default function AdminDashboard() {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<AdminLang>("en");
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -201,16 +229,18 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<DbProduct | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [regenSkuLoading, setRegenSkuLoading] = useState(false);
   const [dbReady, setDbReady] = useState(true);
   const [message, setMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
   const l = t[lang];
 
   useEffect(() => {
-    const saved = localStorage.getItem("admin_lang") as Lang | null;
+    const saved = localStorage.getItem("admin_lang") as AdminLang | null;
     if (saved === "en" || saved === "es") setLang(saved);
   }, []);
 
@@ -241,6 +271,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (authed) fetchProducts();
   }, [authed, fetchProducts]);
+
+  // Scroll to top whenever the edit modal opens or closes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [editing]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -317,37 +352,93 @@ export default function AdminDashboard() {
     setTimeout(() => setMessage(""), 3000);
   }
 
-  async function handleImageUpload(field: string, file: File) {
-    setUploading(field);
-    setMessage(`Uploading ${file.name}...`);
+  async function uploadOne(field: string, file: File): Promise<string | null> {
+    setUploadingField(field);
     const formData = new FormData();
     formData.append("file", file);
-
     try {
       const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        setMessage(`Upload error: invalid server response (${res.status})`);
-        alert(`Upload failed!\nStatus: ${res.status}\nCould not parse response.`);
-        setUploading(null);
-        return;
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.url) {
+        return data.url as string;
       }
-      if (res.ok && data.url) {
-        setEditing((prev) => prev ? { ...prev, [field]: data.url } : prev);
-        setMessage(`Image uploaded successfully`);
-      } else {
-        const errMsg = data.error || `HTTP ${res.status}`;
-        setMessage(`Upload error: ${errMsg}`);
-        alert(`Upload failed!\n${errMsg}`);
-      }
+      const errMsg = data?.error || `HTTP ${res.status}`;
+      setMessage(`${l.uploadFailed}: ${errMsg}`);
+      return null;
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : "network error";
-      setMessage(`Upload failed: ${errMsg}`);
-      alert(`Upload failed!\n${errMsg}`);
+      setMessage(`${l.uploadFailed}: ${errMsg}`);
+      return null;
+    } finally {
+      setUploadingField(null);
     }
-    setUploading(null);
+  }
+
+  async function handleFilesSelected(files: FileList | File[]) {
+    if (!editing) return;
+    const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (arr.length === 0) return;
+
+    // Find empty slots in order
+    const emptySlots: ImageField[] = IMAGE_FIELDS.filter((f) => !editing[f]) as ImageField[];
+    const toProcess = arr.slice(0, emptySlots.length);
+
+    for (let i = 0; i < toProcess.length; i++) {
+      const slot = emptySlots[i];
+      const file = toProcess[i];
+      setMessage(`Uploading ${file.name}... (${i + 1}/${toProcess.length})`);
+      const url = await uploadOne(slot, file);
+      if (url) {
+        setEditing((prev) => prev ? { ...prev, [slot]: url } : prev);
+      }
+    }
+    setMessage(`Uploaded ${toProcess.length} image${toProcess.length > 1 ? "s" : ""}`);
+    setTimeout(() => setMessage(""), 2500);
+  }
+
+  function openPicker() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files) handleFilesSelected(files);
+    };
+    input.click();
+  }
+
+  function setAsMain(field: ImageField) {
+    if (!editing || field === "image_main" || !editing[field]) return;
+    const currentMain = editing.image_main;
+    setEditing({ ...editing, image_main: editing[field], [field]: currentMain });
+  }
+
+  function clearImage(field: ImageField) {
+    if (!editing) return;
+    setEditing({ ...editing, [field]: "" });
+  }
+
+  async function handleRegenerateSku() {
+    if (!editing) return;
+    setRegenSkuLoading(true);
+    try {
+      const res = await fetch("/api/admin/sku/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stone_type: editing.stone_type,
+          metal_type: editing.metal_type,
+          category: editing.category,
+        }),
+      });
+      if (res.ok) {
+        const { sku } = await res.json();
+        setEditing({ ...editing, sku });
+      }
+    } finally {
+      setRegenSkuLoading(false);
+    }
   }
 
   async function handleGenerateDescriptions() {
@@ -394,7 +485,13 @@ export default function AdminDashboard() {
     setTimeout(() => setMessage(""), 3000);
   }
 
-  // Language toggle button
+  const editingMargin = useMemo(() => {
+    if (!editing) return { cost: 0, margin: 0 };
+    const cost = totalCost(editing);
+    const m = marginPct(Number(editing.price_retail || 0), cost);
+    return { cost, margin: m };
+  }, [editing]);
+
   const LangToggle = () => (
     <button onClick={toggleLang}
       className="px-2.5 py-1 rounded font-ui text-xs font-medium border border-cream/20 hover:bg-cream/10 transition-colors text-cream">
@@ -440,6 +537,8 @@ export default function AdminDashboard() {
 
   // --- Edit/New Modal ---
   if (editing) {
+    const mainImg = editing.image_main;
+
     return (
       <div className="min-h-screen bg-cream-dark p-4 sm:p-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 sm:p-8">
@@ -463,6 +562,18 @@ export default function AdminDashboard() {
               <input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })}
                 placeholder={l.autoGenerated}
                 className="w-full border border-gold/20 px-3 py-2.5 rounded font-ui text-sm focus:outline-none focus:border-gold" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block font-ui text-xs text-ocean/60 mb-1 uppercase tracking-wider">{l.sku}</label>
+              <div className="flex gap-2">
+                <input value={editing.sku || ""} onChange={(e) => setEditing({ ...editing, sku: e.target.value })}
+                  placeholder={l.skuHint}
+                  className="flex-1 border border-gold/20 px-3 py-2.5 rounded font-ui text-sm font-mono focus:outline-none focus:border-gold" />
+                <button type="button" onClick={handleRegenerateSku} disabled={regenSkuLoading}
+                  className="px-3 py-2.5 bg-ocean/10 hover:bg-ocean/20 text-ocean rounded font-ui text-xs uppercase tracking-wider transition-colors disabled:opacity-50">
+                  {regenSkuLoading ? "…" : l.regenerateSku}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block font-ui text-xs text-ocean/60 mb-1 uppercase tracking-wider">{l.retailPrice} *</label>
@@ -503,6 +614,11 @@ export default function AdminDashboard() {
               </select>
             </div>
             <div>
+              <label className="block font-ui text-xs text-ocean/60 mb-1 uppercase tracking-wider">{l.stockQty}</label>
+              <input type="number" min="0" value={editing.stock_quantity || 0} onChange={(e) => setEditing({ ...editing, stock_quantity: Number(e.target.value) })}
+                className="w-full border border-gold/20 px-3 py-2.5 rounded font-ui text-sm focus:outline-none focus:border-gold" />
+            </div>
+            <div>
               <label className="block font-ui text-xs text-ocean/60 mb-1 uppercase tracking-wider">{l.weight}</label>
               <input type="number" value={editing.weight_grams} onChange={(e) => setEditing({ ...editing, weight_grams: Number(e.target.value) })}
                 className="w-full border border-gold/20 px-3 py-2.5 rounded font-ui text-sm focus:outline-none focus:border-gold" />
@@ -526,6 +642,42 @@ export default function AdminDashboard() {
               <label className="block font-ui text-xs text-ocean/60 mb-1 uppercase tracking-wider">{l.minWholesaleQty}</label>
               <input type="number" value={editing.min_wholesale_qty} onChange={(e) => setEditing({ ...editing, min_wholesale_qty: Number(e.target.value) })}
                 className="w-full border border-gold/20 px-3 py-2.5 rounded font-ui text-sm focus:outline-none focus:border-gold" />
+            </div>
+          </div>
+
+          {/* Cost breakdown + live margin */}
+          <div className="mt-6 p-4 bg-cream-dark/50 rounded-lg border border-gold/10">
+            <h3 className="font-heading text-sm tracking-wider text-ocean mb-3 uppercase">{l.costs}</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {([
+                ["material_cost", l.materialCost],
+                ["labor_cost", l.laborCost],
+                ["packaging_cost", l.packagingCost],
+                ["shipping_cost", l.shippingCostField],
+              ] as const).map(([key, label]) => (
+                <div key={key}>
+                  <label className="block font-ui text-[10px] text-ocean/60 mb-1 uppercase tracking-wider">{label}</label>
+                  <input type="number" step="0.01" min="0" value={editing[key] || 0}
+                    onChange={(e) => setEditing({ ...editing, [key]: Number(e.target.value) })}
+                    className="w-full border border-gold/20 px-3 py-2 rounded font-ui text-sm focus:outline-none focus:border-gold bg-white" />
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 pt-3 border-t border-gold/10">
+              <div>
+                <p className="font-ui text-[10px] text-ocean/50 uppercase tracking-wider">{l.totalCost}</p>
+                <p className="font-heading text-lg text-ocean mt-0.5">{fmtUSD(editingMargin.cost)}</p>
+              </div>
+              <div>
+                <p className="font-ui text-[10px] text-ocean/50 uppercase tracking-wider">{l.retailPrice}</p>
+                <p className="font-heading text-lg text-gold mt-0.5">{fmtUSD(Number(editing.price_retail || 0))}</p>
+              </div>
+              <div>
+                <p className="font-ui text-[10px] text-ocean/50 uppercase tracking-wider">{l.margin}</p>
+                <p className={`font-heading text-lg mt-0.5 ${editingMargin.margin >= 50 ? "text-green-700" : editingMargin.margin >= 30 ? "text-yellow-700" : "text-red-600"}`}>
+                  {editingMargin.margin.toFixed(1)}%
+                </p>
+              </div>
             </div>
           </div>
 
@@ -610,75 +762,99 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* Image Uploads */}
+          {/* Image uploads — redesigned */}
           <div className="mt-6">
             <h3 className="font-heading text-sm tracking-wider text-ocean mb-3 uppercase">{l.images}</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {["image_main", "image2", "image3", "image4"].map((field) => (
-                <div key={field} className="space-y-2">
-                  <label className="font-ui text-xs text-ocean/50 uppercase">{field === "image_main" ? l.mainThumbnail : field}</label>
-                  <div
-                    className={`w-full aspect-square bg-cream-dark rounded flex items-center justify-center overflow-hidden relative cursor-pointer border-2 transition-colors ${
-                      editing.image_main === editing[field] && editing[field] ? "border-ambar ring-2 ring-ambar/30" : "border-gold/10"
-                    }`}
-                    onClick={() => {
-                      if (editing[field] && field !== "image_main") {
-                        const currentMain = editing.image_main;
-                        setEditing({ ...editing, image_main: editing[field], [field]: currentMain });
-                      }
-                    }}
-                    title={field !== "image_main" && editing[field] ? l.clickSetThumbnail : ""}
-                  >
-                    {editing[field] ? (
+
+            {/* Drop zone + main preview */}
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+                if (e.dataTransfer.files?.length) handleFilesSelected(e.dataTransfer.files);
+              }}
+              className={`relative rounded-lg border-2 border-dashed transition-colors ${dragActive ? "border-ambar bg-ambar/5" : "border-gold/20 bg-cream-dark/30"} p-4`}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {/* Main preview (big) */}
+                <div className="md:col-span-3">
+                  <p className="font-ui text-[10px] text-ocean/50 uppercase tracking-wider mb-2">{l.mainPhoto}</p>
+                  <div className="aspect-square bg-white rounded-lg border border-gold/20 overflow-hidden flex items-center justify-center relative">
+                    {mainImg ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={editing[field]} alt="" className="w-full h-full object-cover" />
-                        {field === "image_main" && (
-                          <span className="absolute top-1 left-1 bg-ambar text-navy px-1.5 py-0.5 rounded font-ui text-[9px] uppercase font-bold">
-                            {l.thumbnail}
-                          </span>
-                        )}
-                        {field !== "image_main" && (
-                          <span className="absolute bottom-1 left-1 right-1 bg-black/60 text-white text-center py-0.5 rounded font-ui text-[9px] opacity-0 hover:opacity-100 transition-opacity">
-                            {l.clickSetThumbnail}
-                          </span>
-                        )}
+                        <img src={mainImg} alt="" className="w-full h-full object-cover" />
+                        <span className="absolute top-2 left-2 bg-ambar text-navy px-2 py-0.5 rounded font-ui text-[10px] uppercase font-bold">
+                          ★ {l.mainBadge}
+                        </span>
+                        <button type="button" onClick={() => clearImage("image_main")}
+                          className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-red-500 text-white rounded-full flex items-center justify-center font-ui text-xs transition-colors">
+                          ×
+                        </button>
                       </>
                     ) : (
-                      <span className="text-ocean/20 font-ui text-xs">{l.noImage}</span>
+                      <div className="text-center px-4">
+                        <p className="font-ui text-sm text-ocean/40 mb-1">No main photo</p>
+                        <p className="font-ui text-xs text-ocean/30">{l.dropHere}</p>
+                      </div>
                     )}
                   </div>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      className="flex-1 bg-ambar-light/20 hover:bg-ambar-light/30 text-ocean text-center py-1.5 rounded cursor-pointer font-ui text-xs transition-colors"
-                      disabled={uploading === field}
-                      onClick={() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "image/*";
-                        input.onchange = (e) => {
-                          const f = (e.target as HTMLInputElement).files?.[0];
-                          if (f) handleImageUpload(field, f);
-                        };
-                        input.click();
-                      }}
-                    >
-                      {uploading === field ? l.uploading : l.upload}
-                    </button>
-                    {editing[field] && (
-                      <button onClick={() => setEditing({ ...editing, [field]: "" })}
-                        className="px-2 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded font-ui text-xs transition-colors">
-                        X
-                      </button>
-                    )}
-                  </div>
-                  <input value={editing[field] || ""} onChange={(e) => setEditing({ ...editing, [field]: e.target.value })}
-                    placeholder={l.pasteUrl}
-                    className="w-full border border-gold/15 px-2 py-1.5 rounded font-ui text-xs focus:outline-none focus:border-gold" />
                 </div>
-              ))}
+
+                {/* Thumb column */}
+                <div className="md:col-span-2 flex flex-col gap-2">
+                  <div className="grid grid-cols-4 md:grid-cols-2 gap-2">
+                    {IMAGE_FIELDS.filter((f) => f !== "image_main").map((field) => (
+                      <div key={field} className="relative aspect-square bg-white rounded border border-gold/15 overflow-hidden group">
+                        {editing[field] ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={editing[field]} alt="" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                              <button type="button" onClick={() => setAsMain(field)}
+                                className="px-2 py-1 bg-ambar text-navy rounded font-ui text-[10px] uppercase font-bold hover:bg-ambar-light">
+                                ★ {l.setAsMain}
+                              </button>
+                              <button type="button" onClick={() => clearImage(field)}
+                                className="px-2 py-1 bg-red-500 text-white rounded font-ui text-[10px] uppercase font-bold hover:bg-red-600">
+                                {lang === "es" ? "Eliminar" : "Remove"}
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-ocean/20 font-ui text-xs">
+                            +
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button type="button" onClick={openPicker} disabled={!!uploadingField}
+                    className="mt-1 w-full py-2.5 bg-ambar-light hover:bg-ambar text-navy rounded font-ui text-xs tracking-wider uppercase font-medium transition-colors disabled:opacity-50">
+                    {uploadingField ? l.uploading : `+ ${l.uploadPhotos}`}
+                  </button>
+                  <p className="text-center font-ui text-[10px] text-ocean/40">{l.dropHere}</p>
+                </div>
+              </div>
             </div>
+
+            {/* URL inputs (fallback for manual entry) */}
+            <details className="mt-3">
+              <summary className="font-ui text-xs text-ocean/50 cursor-pointer hover:text-ocean">{l.pasteUrl}</summary>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                {IMAGE_FIELDS.map((field) => (
+                  <div key={field}>
+                    <label className="block font-ui text-[10px] text-ocean/50 mb-1 uppercase">{field}</label>
+                    <input value={editing[field] || ""} onChange={(e) => setEditing({ ...editing, [field]: e.target.value })}
+                      placeholder="https://..."
+                      className="w-full border border-gold/15 px-2 py-1.5 rounded font-ui text-xs focus:outline-none focus:border-gold" />
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
 
           {/* Save */}
@@ -697,7 +873,14 @@ export default function AdminDashboard() {
     );
   }
 
-  // --- Product List ---
+  // --- Main Dashboard with tabs ---
+  const tabs: Array<{ key: Tab; label: string }> = [
+    { key: "dashboard", label: l.dashboard },
+    { key: "products", label: l.products },
+    { key: "inventory", label: l.inventory },
+    { key: "orders", label: l.orders },
+  ];
+
   return (
     <div className="min-h-screen bg-cream-dark">
       {/* Header */}
@@ -708,7 +891,7 @@ export default function AdminDashboard() {
           </h1>
           <div className="flex items-center gap-4">
             <LangToggle />
-            <a href="/" className="font-ui text-xs text-cream/50 hover:text-cream transition-colors">{l.viewSite}</a>
+            <Link href="/" className="font-ui text-xs text-cream/50 hover:text-cream transition-colors">{l.viewSite}</Link>
             <button onClick={handleLogout} className="font-ui text-xs text-cream/50 hover:text-cream transition-colors">
               {l.logout}
             </button>
@@ -718,27 +901,20 @@ export default function AdminDashboard() {
 
       {/* Tab Navigation */}
       <div className="bg-white border-b border-ocean/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-0">
-          <button
-            onClick={() => setActiveTab("products")}
-            className={`px-6 py-3 font-ui text-sm tracking-wider transition-colors border-b-2 ${
-              activeTab === "products"
-                ? "border-ambar text-ocean font-medium"
-                : "border-transparent text-ocean/40 hover:text-ocean/70"
-            }`}
-          >
-            {l.products}
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`px-6 py-3 font-ui text-sm tracking-wider transition-colors border-b-2 ${
-              activeTab === "orders"
-                ? "border-ambar text-ocean font-medium"
-                : "border-transparent text-ocean/40 hover:text-ocean/70"
-            }`}
-          >
-            {lang === "es" ? "Pedidos" : "Orders"}
-          </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-0 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-6 py-3 font-ui text-sm tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+                activeTab === tab.key
+                  ? "border-ambar text-ocean font-medium"
+                  : "border-transparent text-ocean/40 hover:text-ocean/70"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -748,121 +924,122 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === "orders" ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-          <OrdersManager />
-        </div>
-      ) : (
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-        {/* Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div>
-            <h2 className="font-heading text-xl tracking-[0.08em] text-ocean">{l.products}</h2>
-            <p className="font-ui text-xs text-ocean/40 mt-1">{products.length} {l.productsInDb}</p>
-          </div>
-          <div className="flex gap-3">
-            {!dbReady && (
-              <button onClick={handleSetupDb}
-                className="px-6 py-2.5 bg-ocean text-cream rounded font-ui text-xs tracking-wider uppercase transition-colors hover:bg-ocean-dark">
-                {l.initDb}
-              </button>
-            )}
-            <button onClick={() => { setEditing({ ...EMPTY_PRODUCT }); setIsNew(true); }}
-              className="px-6 py-2.5 bg-ambar-light hover:bg-ambar text-navy rounded font-ui text-xs tracking-wider uppercase font-medium transition-colors">
-              {l.addProduct}
-            </button>
-          </div>
-        </div>
+        {activeTab === "dashboard" && <DashboardPanel products={products} lang={lang} />}
 
-        {loading ? (
-          <p className="text-center font-ui text-sm text-ocean/40 py-20">{l.loading}</p>
-        ) : !dbReady ? (
-          <div className="text-center py-20 bg-white rounded-lg border border-gold/10">
-            <p className="font-heading text-lg text-ocean mb-3">{l.dbNotConnected}</p>
-            <p className="font-ui text-sm text-ocean/50 mb-6 max-w-md mx-auto">
-              {l.dbNotConnectedMsg}
-            </p>
-            <button onClick={handleSetupDb}
-              className="px-8 py-3 bg-ocean text-cream rounded font-ui text-sm tracking-wider uppercase transition-colors hover:bg-ocean/80">
-              {l.initDb}
-            </button>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-lg border border-gold/10">
-            <p className="font-heading text-lg text-ocean mb-3">{l.noProducts}</p>
-            <p className="font-ui text-sm text-ocean/50 mb-6">{l.noProductsMsg}</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-gold/10 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-cream-dark">
-                  <tr>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.image}</th>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.name}</th>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.category}</th>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.price}</th>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.stock}</th>
-                    <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.status}</th>
-                    <th className="text-right font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.actions}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((p) => (
-                    <tr key={p.id} className="border-t border-gold/10 hover:bg-cream/50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="w-12 h-12 bg-cream-dark rounded overflow-hidden">
-                          {p.image_main ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={p.image_main} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-ocean/15 text-xs font-ui">IMG</div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="font-body text-sm text-ocean font-medium">{p.name}</p>
-                        <p className="font-ui text-xs text-ocean/40">{p.id}</p>
-                      </td>
-                      <td className="px-4 py-3 font-ui text-xs text-ocean/60">{CATEGORY_LABELS[lang][p.category] || p.category}</td>
-                      <td className="px-4 py-3 font-ui text-sm text-gold font-medium">${Number(p.price_retail).toFixed(0)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded font-ui text-xs ${
-                          p.stock_status === "in-stock" ? "bg-green-100 text-green-700" :
-                          p.stock_status === "low-stock" ? "bg-yellow-100 text-yellow-700" :
-                          p.stock_status === "sold-out" ? "bg-red-100 text-red-700" :
-                          "bg-blue-100 text-blue-700"
-                        }`}>
-                          {STOCK_LABELS[lang][p.stock_status] || p.stock_status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          {p.featured && <span className="inline-block px-1.5 py-0.5 bg-ambar-light/20 text-ambar rounded font-ui text-[10px]">{l.featured}</span>}
-                          {!p.visible && <span className="inline-block px-1.5 py-0.5 bg-red-100 text-red-600 rounded font-ui text-[10px]">{l.hidden}</span>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex gap-2 justify-end">
-                          <button onClick={() => { setEditing({ ...p }); setIsNew(false); }}
-                            className="px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-ocean rounded font-ui text-xs transition-colors">
-                            {l.edit}
-                          </button>
-                          <button onClick={() => handleDelete(p.id)}
-                            className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded font-ui text-xs transition-colors">
-                            {l.delete}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {activeTab === "inventory" && <InventoryManager products={products} lang={lang} />}
+
+        {activeTab === "orders" && <OrdersManager />}
+
+        {activeTab === "products" && (
+          <>
+            {/* Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+              <div>
+                <h2 className="font-heading text-xl tracking-[0.08em] text-ocean">{l.products}</h2>
+                <p className="font-ui text-xs text-ocean/40 mt-1">{products.length} {l.productsInDb}</p>
+              </div>
+              <div className="flex gap-3">
+                {!dbReady && (
+                  <button onClick={handleSetupDb}
+                    className="px-6 py-2.5 bg-ocean text-cream rounded font-ui text-xs tracking-wider uppercase transition-colors hover:bg-ocean-dark">
+                    {l.initDb}
+                  </button>
+                )}
+                <button onClick={() => { setEditing({ ...EMPTY_PRODUCT }); setIsNew(true); }}
+                  className="px-6 py-2.5 bg-ambar-light hover:bg-ambar text-navy rounded font-ui text-xs tracking-wider uppercase font-medium transition-colors">
+                  {l.addProduct}
+                </button>
+              </div>
             </div>
-          </div>
+
+            {loading ? (
+              <p className="text-center font-ui text-sm text-ocean/40 py-20">{l.loading}</p>
+            ) : !dbReady ? (
+              <div className="text-center py-20 bg-white rounded-lg border border-gold/10">
+                <p className="font-heading text-lg text-ocean mb-3">{l.dbNotConnected}</p>
+                <p className="font-ui text-sm text-ocean/50 mb-6 max-w-md mx-auto">
+                  {l.dbNotConnectedMsg}
+                </p>
+                <button onClick={handleSetupDb}
+                  className="px-8 py-3 bg-ocean text-cream rounded font-ui text-sm tracking-wider uppercase transition-colors hover:bg-ocean/80">
+                  {l.initDb}
+                </button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-lg border border-gold/10">
+                <p className="font-heading text-lg text-ocean mb-3">{l.noProducts}</p>
+                <p className="font-ui text-sm text-ocean/50 mb-6">{l.noProductsMsg}</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-gold/10 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-cream-dark">
+                      <tr>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.image}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.sku}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.name}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.category}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.price}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.stock}</th>
+                        <th className="text-left font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.status}</th>
+                        <th className="text-right font-ui text-xs text-ocean/50 uppercase tracking-wider px-4 py-3">{l.actions}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((p) => (
+                        <tr key={p.id} className="border-t border-gold/10 hover:bg-cream/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="w-12 h-12 bg-cream-dark rounded overflow-hidden">
+                              {p.image_main ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={p.image_main} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-ocean/15 text-xs font-ui">IMG</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-ocean/70">{p.sku || "—"}</td>
+                          <td className="px-4 py-3">
+                            <p className="font-body text-sm text-ocean font-medium">{p.name}</p>
+                            <p className="font-ui text-xs text-ocean/40">{p.id}</p>
+                          </td>
+                          <td className="px-4 py-3 font-ui text-xs text-ocean/60">{CATEGORY_LABELS[lang][p.category] || p.category}</td>
+                          <td className="px-4 py-3 font-ui text-sm text-gold font-medium">${Number(p.price_retail).toFixed(0)}</td>
+                          <td className="px-4 py-3 font-ui text-sm text-ocean">{p.stock_quantity ?? 0}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-block px-2 py-0.5 rounded font-ui text-xs ${
+                              p.stock_status === "in-stock" ? "bg-green-100 text-green-700" :
+                              p.stock_status === "low-stock" ? "bg-yellow-100 text-yellow-700" :
+                              p.stock_status === "sold-out" ? "bg-red-100 text-red-700" :
+                              "bg-blue-100 text-blue-700"
+                            }`}>
+                              {STOCK_LABELS[lang][p.stock_status] || p.stock_status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex gap-2 justify-end">
+                              <button onClick={() => { setEditing({ ...p }); setIsNew(false); }}
+                                className="px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-ocean rounded font-ui text-xs transition-colors">
+                                {l.edit}
+                              </button>
+                              <button onClick={() => handleDelete(p.id)}
+                                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded font-ui text-xs transition-colors">
+                                {l.delete}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
-      )}
     </div>
   );
 }

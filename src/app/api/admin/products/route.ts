@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDb, initDatabase } from "@/lib/db";
+import { generateSku } from "@/lib/sku";
 
 export async function GET() {
   if (!(await isAdmin())) {
@@ -30,24 +31,37 @@ export async function POST(request: NextRequest) {
     const slug = body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const id = body.id || `${body.stone_type?.toUpperCase().slice(0, 3) || "PRD"}-${Date.now()}`;
 
+    const sku = body.sku?.trim()
+      ? body.sku.trim()
+      : await generateSku(
+          body.stone_type || "larimar",
+          body.metal_type || "sterling-silver",
+          body.category || "pendants",
+        );
+
     await sql`
       INSERT INTO products (
-        id, name, slug, description, short_description,
+        id, name, slug, sku, description, short_description,
         description_es, short_description_es,
         description_de, short_description_de,
         price_retail, price_wholesale, min_wholesale_qty,
+        material_cost, labor_cost, packaging_cost, shipping_cost,
+        stock_quantity,
         category, stone_type, metal_type,
         image_main, image2, image3, image4,
         stock_status, featured, wholesale_eligible, new_arrival,
         weight_grams, dimensions, stone_origin,
         visible, sort_order, date_added, seo_title, seo_description
       ) VALUES (
-        ${id}, ${body.name}, ${slug}, ${body.description || ""},
+        ${id}, ${body.name}, ${slug}, ${sku}, ${body.description || ""},
         ${body.short_description || ""},
         ${body.description_es || ""}, ${body.short_description_es || ""},
         ${body.description_de || ""}, ${body.short_description_de || ""},
         ${body.price_retail || 0}, ${body.price_wholesale || 0},
         ${body.min_wholesale_qty || 1},
+        ${body.material_cost || 0}, ${body.labor_cost || 0},
+        ${body.packaging_cost || 0}, ${body.shipping_cost || 0},
+        ${body.stock_quantity || 0},
         ${body.category || "pendants"}, ${body.stone_type || "larimar"},
         ${body.metal_type || "sterling-silver"},
         ${body.image_main || ""}, ${body.image2 || ""}, ${body.image3 || ""}, ${body.image4 || ""},
@@ -67,7 +81,7 @@ export async function POST(request: NextRequest) {
     revalidatePath(`/shop/${slug}`);
     revalidatePath("/");
 
-    return NextResponse.json({ success: true, id, slug });
+    return NextResponse.json({ success: true, id, slug, sku });
   } catch (error) {
     console.error("Failed to create product:", error);
     return NextResponse.json({ error: "Failed to create product" }, { status: 500 });

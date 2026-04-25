@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCartStore, generateOrderMessage } from "@/lib/cart-store";
+import { useCartStore } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
-import { BRAND } from "@/lib/constants";
 
 export default function CartPage() {
   const items = useCartStore((s) => s.items);
@@ -11,8 +10,6 @@ export default function CartPage() {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const clearCart = useCartStore((s) => s.clearCart);
   const total = useCartStore((s) => s.total());
-
-  const mailtoUrl = `mailto:${BRAND.email}?subject=Order%20from%20Ambar%20%26%20Larimar%20Shop&body=${generateOrderMessage(items)}`;
 
   return (
     <div className="py-12 sm:py-16">
@@ -154,20 +151,12 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <div className="space-y-3">
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-ambar-light hover:bg-ambar text-navy text-center py-4 font-ui text-sm tracking-[0.15em] uppercase transition-colors"
-                >
-                  Proceed to Checkout
-                </Link>
-                <a
-                  href={mailtoUrl}
-                  className="block w-full text-center py-4 border border-gold text-ocean hover:bg-gold/10 font-ui text-sm tracking-[0.15em] uppercase transition-colors"
-                >
-                  Or Order via Email
-                </a>
-              </div>
+              <Link
+                href="/checkout"
+                className="block w-full bg-ambar-light hover:bg-ambar text-navy text-center py-4 font-ui text-sm tracking-[0.15em] uppercase transition-colors"
+              >
+                Proceed to Checkout
+              </Link>
 
               <button
                 onClick={clearCart}

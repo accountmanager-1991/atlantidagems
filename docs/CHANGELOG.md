@@ -4,6 +4,77 @@ All notable changes to the Ambar & Larimar Shop project.
 
 ---
 
+## [1.2.0] - 2026-04-24 — Brand Identity Redesign & Full Asset Kit
+
+### Brand
+- **New logo (Concept A "Caribbean Sun")** — circular seal, amber sunburst on top, larimar waves below, real DR silhouette at center with map pins (Larimar at Barahona, Amber at Puerto Plata, Santo Domingo capital), gold double ring outline
+- **Master SVG sources** — `logo-mark.svg`, `logo-horizontal.svg` in `brand-kit/01-LOGOS/final-2026-04/`
+- **Real DR outline** — sourced from open-source mapsicon project, traced via potrace, embedded as nested SVG with non-scaling stroke
+
+### Site
+- **Header + Footer** — swapped to new logo mark
+- **Favicon system** — `favicon-{16,32,48,192}.png` + `apple-touch-icon.png` (180px) wired into `metadata.icons` in `layout.tsx`
+- **OpenGraph image** — rebuilt with logo + radial navy gradient + brand wordmark + tagline (replaces the text-only version)
+- **Tailwind palette** — added `--color-gold-deep` (#8A6418) for parity with brand-kit
+- **Brand-aligned preview pages** — `public/brand-preview.css` loads Cinzel/Cormorant/Montserrat from Google Fonts, applied to `/logo-concepts.html`, `/logo-kit.html`, `/social-kit.html`
+
+### Social media kit
+- **Banners** for 8 platforms in light + dark themes (16 SVG + 16 PNG):
+  - Facebook cover (1200×630), X header (1500×500), LinkedIn banner (1584×396), YouTube banner (2560×1440), Pinterest pin (1000×1500), Etsy shop icon (500×500), Etsy big banner (3360×840), Etsy mini banner (1200×300)
+- **Instagram product templates** with framed center zone (drop-in jewelry photo, gold corner brackets):
+  - Square 1080×1080, Portrait 1080×1350, Story 1080×1920 — all in light + dark
+- **Etsy listing photo template** (2000×2000) — branded frame for product listing photos
+
+### Print
+- **Business cards** — print-ready 3.5"×2" with 1/8" bleed, 1/8" safe zone, 300 DPI, crop marks
+- **4 variants:** front + back × light + dark = 8 files (SVG + PNG)
+- **Editable in Illustrator/Inkscape/Figma** to add personal name or phone number before sending to printer
+
+### Brand book
+- **PDF Brand Guide** (`Ambar-Larimar-Brand-Guide.pdf`) — 8 pages: cover, story, logo system, color palette (12 swatches with hex/RGB/CMYK), typography, social spec sheet, print specs, resources
+
+### Google-Drive-ready structure
+- **`brand-kit/google-drive-ready/`** — 10 numbered subfolders (01-FACEBOOK through 09-BUSINESS-CARD + 00-BRAND-CORE), each with its own README, ready to drag into Drive
+
+### Documentation
+- **`docs/BRAND.md`** — comprehensive brand asset reference (logo, palette, typography, social kit, print specs, regen commands, how-to-update guide)
+- **`docs/CLAUDE.md`** + **`docs/PROJECT-BRIEF.md`** — updated to reference the new brand-kit paths (removed broken refs to old `brand-assets/atlantida-*` files)
+
+### Tooling
+- Installed `sharp` (SVG → PNG rasterization) + `pdfkit` (PDF generation) as dev dependencies
+- 5 new generator scripts in `scripts/`:
+  - `export-logo-pngs.mjs` — every standard PNG size + favicons
+  - `generate-social-kit.mjs` — banners + IG templates + Etsy assets
+  - `generate-business-card.mjs` — print-ready cards
+  - `generate-brand-guide-pdf.mjs` — brand book PDF
+  - `organize-kit-for-drive.mjs` — rebuilds the Drive folder structure
+
+---
+
+## [1.1.0] - 2026-04-24 — Inventory, P&L Dashboard & SKU System
+
+### Added
+- **SKU auto-generator** — `src/lib/sku.ts` generates `AL-{STONE}{METAL}-{CAT}-{NNN}` (e.g., `AL-LARSS-PND-001`)
+- **SKU preview endpoint** — `/api/admin/sku/preview` for the Regenerate button in the admin edit modal
+- **Cost breakdown per product** — 4 new columns: `material_cost`, `labor_cost`, `packaging_cost`, `shipping_cost`
+- **Stock quantity tracking** — `stock_quantity INTEGER` column (numeric, in addition to existing `stock_status` tag)
+- **Inventory tab** — `InventoryManager.tsx` component: sortable table (SKU, qty, unit cost, retail, margin %, stock value), low-stock filter, CSV export, row totals
+- **Dashboard tab** — `DashboardPanel.tsx` component: 8 KPI cards (units, inventory value, potential revenue, avg margin, low/out-of-stock, paid orders), 7-day / 30-day revenue + gross profit, margin breakdowns by stone/metal/category with bars, top 5 / bottom 5 margin products, low-stock alerts list
+- **Auto-decrement stock on paid orders** — Stripe webhook updates `stock_quantity` and auto-flags low-stock / sold-out (resolves TD012)
+- **Shared admin constants** — `src/lib/admin-constants.ts` (categories, stones, metals, stock statuses, labels, cost helpers)
+
+### Changed
+- **Admin edit modal** — redesigned image upload UI: large main preview + 3 thumbnail column, drag-and-drop, multi-file picker (fills empty slots in order), hover "★ Set as main" button on thumbnails, URL inputs moved to collapsed `<details>` section
+- **Admin edit modal** — added SKU field with Regenerate button, stock quantity input, 4-field cost breakdown with live "Total Cost · Retail · Margin %" calculation
+- **Admin tab bar** — now 4 tabs: Dashboard · Products · Inventory · Orders (was Products · Orders)
+- **Admin products table** — added SKU and stock quantity columns
+
+### Infrastructure
+- Safe ALTER TABLE migration in `initDatabase()` adds all 6 new columns + unique SKU index
+- No data loss — existing products get NULL/0 defaults; owner can regenerate SKU from edit modal
+
+---
+
 ## [1.0.0] - 2026-03-12 — Launch: Security Hardening, Rate Limiting, Social Media Kit
 
 ### Security

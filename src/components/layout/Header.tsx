@@ -61,11 +61,11 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
               <Image
-                src="/images/logos/logo-icon-transparent.png"
+                src="/images/logos/logo-mark-2026-04.svg"
                 alt={BRAND.name}
-                width={44}
-                height={44}
-                className="h-11 w-auto"
+                width={48}
+                height={48}
+                className="h-12 w-auto"
                 priority
               />
               <div className="flex flex-col">

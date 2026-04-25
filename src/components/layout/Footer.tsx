@@ -24,11 +24,11 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <Image
-                src="/images/logos/logo-icon-transparent.png"
+                src="/images/logos/logo-mark-2026-04.svg"
                 alt={BRAND.name}
-                width={36}
-                height={36}
-                className="h-9 w-auto"
+                width={40}
+                height={40}
+                className="h-10 w-auto"
               />
               <h3 className="font-heading text-xl tracking-[0.15em] text-cream">
                 {BRAND.name}

@@ -1,18 +1,70 @@
 # Session Status
 
 **Project:** Ambar & Larimar Shop (formerly Atlantida Gems)
-**Last Updated:** 2026-03-12
-**Session:** 13
+**Last Updated:** 2026-04-24
+**Session:** 14
 
 ---
 
 ## Current Focus
 
 **What I'm working on right now:**
-> Session 13 — Site is LIVE at ambarlarimarshop.com! Full security audit done, rate limiting added, Resend removed, Pinterest verified, social media profiles + banners created. Next: test full order flow, add real products, activate n8n workflows.
+> Session 14 — Two major bodies of work shipped together: (1) **Inventory + P&L module** with SKU generator, cost breakdown, stock auto-decrement, Dashboard + Inventory tabs; (2) **Brand identity redesign** to "Caribbean Sun" Concept A with full asset kit (logo system, social banners, IG templates, Etsy assets, business cards, brand guide PDF, Drive-ready folders).
 
 **Why this matters:**
-> All launch blockers resolved. Security hardened. Store can accept real orders. Brand kit complete for all social platforms.
+> Owner now has full operational visibility (margin per product, live KPIs, no overselling risk) AND a complete, on-brand visual identity ready to deploy across every social channel and print surface. Site fully aligned with the new brand. TD012 closed. v1.1.0 + v1.2.0 shipped.
+
+---
+
+## Completed This Session (Session 14) — Brand Identity Redesign
+
+| Task | Status | Notes |
+|------|--------|-------|
+| **Logo design (Concept A "Caribbean Sun")** | Done | Circular seal with amber sunburst + larimar waves + real DR silhouette + map pins |
+| Real DR outline embedded | Done | Sourced from open-source mapsicon, traced via potrace, embedded with `vector-effect="non-scaling-stroke"` |
+| Master logo SVGs | Done | `brand-kit/01-LOGOS/final-2026-04/logo-mark.svg` + `logo-horizontal.svg` |
+| Logo PNG exports (23 sizes) | Done | 32 / 48 / 64 / 128 / 180 / 192 / 256 / 320 / 400 / 512 / 800 / 1024 / 2048 + favicons + horizontal widths |
+| Site logo swap (Header/Footer) | Done | `logo-mark-2026-04.svg` in [Header.tsx](src/components/layout/Header.tsx), [Footer.tsx](src/components/layout/Footer.tsx) |
+| Favicon system | Done | `favicon-{16,32,48,192}.png` + `apple-touch-icon.png` wired into `metadata.icons` |
+| OpenGraph image rebuild | Done | Now includes the logo + brand colors (was text-only) |
+| Tailwind palette gold-deep | Done | Added `--color-gold-deep: #8A6418` for parity with brand-kit |
+| Social media banners (light + dark) | Done | Facebook, X, LinkedIn, YouTube, Pinterest, Etsy (icon + big + mini + listing template) |
+| Instagram product templates (light + dark) | Done | Square 1080×1080, Portrait 1080×1350, Story 1080×1920 with framed center zones |
+| Business cards (print-ready) | Done | 3.5"×2", 1/8" bleed, 300 DPI, crop marks, light + dark, front + back |
+| Brand Guide PDF | Done | 8 pages: cover, story, logo, palette (12 swatches w/ hex/RGB/CMYK), typography, social specs, print, resources |
+| Google-Drive-ready folders | Done | 10 numbered subfolders in `brand-kit/google-drive-ready/` with READMEs per platform |
+| **LOGO-EVERYWHERE consolidated folder** | Done | 8 use-case-named subfolders (Master / Profiles / Favicons / App icons / Print / Watermark / Email / Stamps) |
+| Brand-aligned preview pages | Done | `public/brand-preview.css` loads Cinzel/Cormorant/Montserrat from Google Fonts; applied to all 3 preview pages |
+| `docs/BRAND.md` | Done | Comprehensive brand asset reference |
+| `docs/CLAUDE.md` + `docs/PROJECT-BRIEF.md` | Done | Removed broken `brand-assets/atlantida-*` references, point to new brand-kit paths |
+| 6 generator scripts in `scripts/` | Done | Reproducible kit — change a color, re-run, done |
+| Installed `sharp` + `pdfkit` | Done | DevDeps for SVG→PNG and PDF generation |
+
+## Completed This Session (Session 14) — Inventory + P&L Module
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Schema migration (6 new columns) | Done | `sku`, `stock_quantity`, `material_cost`, `labor_cost`, `packaging_cost`, `shipping_cost` + unique SKU index |
+| SKU auto-generator | Done | `src/lib/sku.ts` — `AL-{STONE}{METAL}-{CAT}-{NNN}` format, DB-aware counter |
+| SKU preview endpoint | Done | `/api/admin/sku/preview` for Regenerate button |
+| Shared admin constants | Done | `src/lib/admin-constants.ts` — labels, `totalCost()`, `marginPct()`, `fmtUSD()` |
+| Products POST — auto-SKU | Done | Generates SKU on create if blank |
+| Products PUT — cost fields | Done | All 6 new columns persisted on update |
+| Stripe webhook — stock decrement | Done | `GREATEST(0, qty - sold)` + auto low-stock / sold-out |
+| InventoryManager component | Done | Sortable table, low-stock filter, CSV export, totals footer |
+| DashboardPanel component | Done | 8 KPIs, 4 revenue cards, margin breakdowns (stone/metal/category), top/bottom 5, low-stock alerts |
+| Admin edit modal — SKU + stock + costs | Done | SKU field with regenerate, stock qty input, 4 cost fields, live margin card |
+| Admin upload UI redesign | Done | Big main preview + 3 thumb column, drag & drop, multi-file picker, hover "★ Set as main", URL inputs in `<details>` |
+| 4-tab nav | Done | Dashboard · Products · Inventory · Orders |
+| TD012 closed | Done | Auto-decrement implemented |
+| Docs updated | Done | CHANGELOG v1.1.0 + v1.2.0, DECISIONS D020 + D021, TECH-DEBT, this file, BRAND.md |
+
+## Post-Session 14 Deployment Checklist
+
+1. **Run `/api/admin/setup`** on production Neon DB to apply the 6 new columns
+2. **Backfill SKUs** for existing products (edit each → click Regenerate → save, or write a one-shot script)
+3. **Enter cost data** per product (material/labor/packaging/shipping) so margin numbers are real
+4. **Enter stock quantities** (numeric) so inventory dashboard shows real inventory
 
 ---
 

@@ -6,6 +6,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function Image() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://ambarlarimarshop.com";
   return new ImageResponse(
     (
       <div
@@ -16,66 +17,72 @@ export default function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0E3A54 0%, #0C1420 100%)",
+          background: "radial-gradient(ellipse at center, #1A2A3E 0%, #0C1420 60%, #08080E 100%)",
           fontFamily: "serif",
         }}
       >
-        {/* Gold accent line */}
-        <div
-          style={{
-            width: 80,
-            height: 3,
-            background: "#C9A84C",
-            marginBottom: 30,
-          }}
+        {/* Logo seal */}
+        <img
+          src={`${baseUrl}/images/logos/logo-mark-400.png`}
+          width={200}
+          height={200}
+          alt=""
+          style={{ marginBottom: 24 }}
         />
+
+        {/* Gold accent line */}
+        <div style={{ width: 100, height: 2, background: "#C9A84C", marginBottom: 22 }} />
 
         {/* Brand name */}
         <div
           style={{
-            fontSize: 56,
-            color: "#EDD8A0",
-            letterSpacing: "0.15em",
+            fontSize: 60,
+            color: "#FAF7F0",
+            letterSpacing: "0.18em",
             textTransform: "uppercase",
-            fontWeight: 400,
+            fontWeight: 700,
           }}
         >
-          Ambar & Larimar Shop
+          Ambar & Larimar
+        </div>
+
+        {/* Italic Shop subtitle */}
+        <div
+          style={{
+            fontSize: 32,
+            color: "#EDD8A0",
+            letterSpacing: "0.4em",
+            fontStyle: "italic",
+            marginTop: 6,
+          }}
+        >
+          Shop
         </div>
 
         {/* Tagline */}
         <div
           style={{
             fontSize: 22,
-            color: "#3AADCC",
-            letterSpacing: "0.25em",
-            marginTop: 16,
+            color: "#C9A84C",
+            letterSpacing: "0.3em",
+            marginTop: 24,
             textTransform: "uppercase",
           }}
         >
-          Fine Caribbean Jewelry
+          The Rarest Stones on Earth
         </div>
 
-        {/* Gold accent line */}
+        {/* Bottom small text */}
         <div
           style={{
-            width: 80,
-            height: 3,
-            background: "#C9A84C",
-            marginTop: 30,
-          }}
-        />
-
-        {/* Description */}
-        <div
-          style={{
-            fontSize: 18,
-            color: "rgba(250, 247, 240, 0.6)",
-            marginTop: 24,
-            letterSpacing: "0.1em",
+            fontSize: 14,
+            color: "rgba(237, 216, 160, 0.65)",
+            marginTop: 32,
+            letterSpacing: "0.35em",
+            textTransform: "uppercase",
           }}
         >
-          Handcrafted Larimar & Amber from the Dominican Republic
+          Fine Caribbean Jewelry · Dominican Republic
         </div>
       </div>
     ),

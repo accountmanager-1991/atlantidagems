@@ -50,6 +50,15 @@ export async function initDatabase() {
   try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS description_de TEXT DEFAULT ''`; } catch { /* exists */ }
   try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description_de TEXT DEFAULT ''`; } catch { /* exists */ }
 
+  // Inventory + SKU + cost breakdown migration
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT DEFAULT ''`; } catch { /* exists */ }
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity INTEGER DEFAULT 0`; } catch { /* exists */ }
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS material_cost NUMERIC(10,2) DEFAULT 0`; } catch { /* exists */ }
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS labor_cost NUMERIC(10,2) DEFAULT 0`; } catch { /* exists */ }
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS packaging_cost NUMERIC(10,2) DEFAULT 0`; } catch { /* exists */ }
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_cost NUMERIC(10,2) DEFAULT 0`; } catch { /* exists */ }
+  try { await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products (sku) WHERE sku != ''`; } catch { /* exists */ }
+
   // Orders table
   await sql`
     CREATE TABLE IF NOT EXISTS orders (

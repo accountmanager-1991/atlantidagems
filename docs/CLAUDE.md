@@ -122,10 +122,11 @@ When solving bugs, document them using this format:
 | File | Purpose |
 |------|---------|
 | `docs/PROJECT-BRIEF.md` | Full business context, brand identity, financials |
-| `brand-assets/atlantida-logo.svg` | Master vector logo |
-| `brand-assets/atlantida-brand-kit.html` | Complete visual brand reference |
-| `brand-assets/atlantida-business-card.pdf` | Print-ready business card |
-| `brand-assets/atlantida-color-palette.pdf` | Color system reference |
+| `docs/BRAND.md` | Complete brand asset reference — logo files, social kit, palette, typography |
+| `brand-kit/00-BRAND-GUIDE/Ambar-Larimar-Brand-Guide.pdf` | Brand book PDF (palette, type, logo system, social specs) |
+| `brand-kit/01-LOGOS/final-2026-04/logo-mark.svg` | Primary logo (Caribbean Sun seal) |
+| `brand-kit/01-LOGOS/final-2026-04/logo-horizontal.svg` | Horizontal lockup with wordmark |
+| `brand-kit/google-drive-ready/` | Per-platform folders ready for Google Drive upload |
 
 ---
 

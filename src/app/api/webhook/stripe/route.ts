@@ -75,6 +75,25 @@ export async function POST(request: NextRequest) {
           ).toFixed(2);
           accessToken = orderRows[0].access_token || "";
         }
+
+        // Decrement stock for each line item (prevents overselling — TD012)
+        for (const item of items) {
+          try {
+            await sql`
+              UPDATE products
+              SET
+                stock_quantity = GREATEST(0, stock_quantity - ${item.quantity}),
+                stock_status = CASE
+                  WHEN GREATEST(0, stock_quantity - ${item.quantity}) = 0 THEN 'sold-out'
+                  WHEN GREATEST(0, stock_quantity - ${item.quantity}) <= 3 THEN 'low-stock'
+                  ELSE stock_status
+                END
+              WHERE id = ${item.id}
+            `;
+          } catch (stockErr) {
+            console.error(`Failed to decrement stock for ${item.id}:`, stockErr);
+          }
+        }
       } catch (dbError) {
         console.error("Failed to update/fetch order:", dbError);
       }

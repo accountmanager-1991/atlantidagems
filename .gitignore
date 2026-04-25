@@ -42,3 +42,11 @@ next-env.d.ts
 
 # generated docs (recreate with scripts/)
 *.docx
+
+# Generated brand-kit derivatives (regenerable from scripts/)
+brand-kit/google-drive-ready/
+brand-kit/LOGO-EVERYWHERE/
+public/logo-everywhere/
+
+# Claude Code project memory (local-only)
+.claude/
