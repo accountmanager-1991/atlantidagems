@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDb } from "@/lib/db";
 
+// Always read fresh DB state — never cache the dashboard.
+export const dynamic = "force-dynamic";
+
 // Returns all dashboard data for a given date range.
 // Query params: ?from=2026-03-01&to=2026-04-25
 // Defaults to last 30 days if not provided.
