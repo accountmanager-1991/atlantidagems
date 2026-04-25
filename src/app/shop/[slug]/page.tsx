@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "@/components/products/AddToCartButton";
 import ProductDescription from "@/components/products/ProductDescription";
 import ProductGallery from "@/components/products/ProductGallery";
+import TrackProductView from "@/components/products/TrackProductView";
 
 export const revalidate = 300;
 
@@ -82,6 +83,9 @@ export default async function ProductPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Track product view (fire-and-forget, dedupe per session) */}
+        <TrackProductView productId={product.id} />
+
         {/* Breadcrumb */}
         <nav className="mb-8 font-ui text-sm text-ocean/50">
           <a href="/shop" className="hover:text-gold transition-colors">

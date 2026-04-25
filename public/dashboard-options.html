@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard — Pick a Style</title>
+<link rel="stylesheet" href="/brand-preview.css">
+<style>
+  body { background: #F0EBE0; padding: 0; }
+  .pick-header { background: var(--navy); color: var(--cream); padding: 32px 40px; text-align: center; position: sticky; top: 0; z-index: 100; }
+  .pick-header h1 { font-family: var(--font-heading); color: var(--cream); margin: 0; font-size: 28px; letter-spacing: 0.15em; }
+  .pick-header .nav { margin-top: 16px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .pick-header .nav a { color: var(--gold-light); text-decoration: none; font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 8px 18px; border: 1px solid var(--gold); border-radius: 3px; transition: all 0.2s; font-weight: 500; }
+  .pick-header .nav a:hover { background: var(--gold); color: var(--navy); }
+
+  .option-section { padding: 48px 32px; max-width: 1320px; margin: 0 auto; }
+  .option-label { display: flex; gap: 16px; align-items: center; margin-bottom: 8px; }
+  .option-label .num { font-family: var(--font-heading); font-size: 56px; color: var(--gold); line-height: 1; }
+  .option-label .name { font-family: var(--font-heading); font-size: 22px; color: var(--larimar-deep); letter-spacing: 0.1em; text-transform: uppercase; }
+  .option-tagline { font-family: var(--font-body); font-style: italic; font-size: 16px; color: rgba(14,58,84,0.7); margin-bottom: 32px; }
+
+  /* ===========================================
+     OPTION A — BENTO GRID (modern asymmetric)
+     ============================================ */
+  .a-bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 110px; gap: 14px; }
+  .a-cell { background: #fff; border-radius: 12px; padding: 18px; transition: all 0.2s; cursor: default; border: 1px solid rgba(201,168,76,0.15); }
+  .a-cell:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14,58,84,0.08); }
+  .a-cell.span-2 { grid-column: span 2; }
+  .a-cell.span-3 { grid-column: span 3; }
+  .a-cell.row-2 { grid-row: span 2; }
+  .a-cell .label { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(14,58,84,0.5); font-weight: 500; }
+  .a-cell .big-value { font-family: var(--font-heading); font-size: 44px; line-height: 1.1; color: var(--navy); margin-top: 8px; }
+  .a-cell .sub { font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.5); margin-top: 6px; }
+  .a-cell.featured { background: linear-gradient(135deg, var(--larimar-deep) 0%, var(--midnight) 100%); color: var(--cream); border: 0; }
+  .a-cell.featured .label { color: var(--gold-light); }
+  .a-cell.featured .big-value { color: var(--cream); font-size: 56px; }
+  .a-cell.featured .sub { color: rgba(237,216,160,0.8); }
+  .a-cell.gold-accent { border-left: 4px solid var(--gold); }
+  .a-cell.green { color: #157f3f; }
+  .a-cell.green .big-value { color: #157f3f; }
+  .a-cell.warn { background: #fef9e8; }
+  .a-cell.warn .big-value { color: #b8860b; }
+  .a-cell.bad { background: #fdeae8; }
+  .a-cell.bad .big-value { color: #c0392b; }
+  .a-spark { height: 30px; margin-top: 10px; display: flex; gap: 3px; align-items: flex-end; }
+  .a-spark .bar { flex: 1; background: var(--gold-light); border-radius: 2px; }
+  .a-cell.featured .a-spark .bar { background: rgba(237,216,160,0.5); }
+
+  .a-list-card { background: #fff; border-radius: 12px; padding: 22px; border: 1px solid rgba(201,168,76,0.15); }
+  .a-list-card h3 { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--larimar-deep); margin: 0 0 16px; }
+  .a-list-card ul { list-style: none; padding: 0; margin: 0; }
+  .a-list-card li { padding: 10px 0; border-bottom: 1px solid rgba(201,168,76,0.1); display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 13px; align-items: center; }
+  .a-list-card li:last-child { border-bottom: 0; }
+  .a-list-card li .name { color: var(--navy); font-family: var(--font-body); font-size: 14px; }
+  .a-list-card li .pct { font-weight: 600; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .a-list-card li .pct.good { background: #e0f5e0; color: #157f3f; }
+  .a-list-card li .pct.warn { background: #fef9e8; color: #b8860b; }
+  .a-bar-row { display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 11px; margin-bottom: 4px; }
+  .a-bar { height: 6px; background: rgba(201,168,76,0.15); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+  .a-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 3px; }
+
+  /* ===========================================
+     OPTION B — EDITORIAL / LUXURY (on-brand, magazine feel)
+     ============================================ */
+  .b-editorial { background: var(--cream); padding: 40px; border-radius: 4px; }
+  .b-section { margin-bottom: 56px; }
+  .b-section:last-child { margin-bottom: 0; }
+  .b-eyebrow { font-family: var(--font-ui); font-size: 11px; color: var(--gold-deep); letter-spacing: 0.4em; text-transform: uppercase; font-weight: 500; margin-bottom: 8px; }
+  .b-headline { font-family: var(--font-heading); font-size: 36px; letter-spacing: 0.1em; color: var(--larimar-deep); text-transform: uppercase; margin: 0; line-height: 1.15; }
+  .b-divider { display: flex; gap: 12px; align-items: center; margin: 24px 0 32px; }
+  .b-divider::before, .b-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .b-divider .dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+
+  .b-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border-top: 1px solid rgba(201,168,76,0.4); }
+  .b-stat { padding: 28px 32px; border-right: 1px solid rgba(201,168,76,0.25); border-bottom: 1px solid rgba(201,168,76,0.25); }
+  .b-stat:last-child { border-right: 0; }
+  .b-stats > .b-stat:nth-last-child(-n+3) { border-bottom: 0; }
+  .b-stat .label { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-deep); margin-bottom: 12px; font-weight: 500; }
+  .b-stat .value { font-family: var(--font-heading); font-size: 56px; color: var(--larimar-deep); line-height: 1; letter-spacing: 0.04em; }
+  .b-stat .sub { font-family: var(--font-body); font-size: 14px; color: rgba(14,58,84,0.6); margin-top: 8px; font-style: italic; }
+  .b-stat.featured { background: var(--larimar-deep); color: var(--cream); }
+  .b-stat.featured .label { color: var(--gold-light); }
+  .b-stat.featured .value { color: var(--gold-light); }
+  .b-stat.featured .sub { color: rgba(237,216,160,0.85); }
+  .b-stat.gold .value { color: var(--gold-deep); }
+  .b-stat.bad .value { color: #c0392b; }
+  .b-stat.warn .value { color: #b8860b; }
+  .b-stat.good .value { color: #157f3f; }
+
+  .b-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+  .b-col h3 { font-family: var(--font-heading); font-size: 18px; letter-spacing: 0.12em; color: var(--larimar-deep); text-transform: uppercase; margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(201,168,76,0.4); }
+  .b-bar-block { margin-bottom: 18px; }
+  .b-bar-label { display: flex; justify-content: space-between; font-family: var(--font-body); font-size: 16px; color: var(--larimar-deep); margin-bottom: 6px; }
+  .b-bar-label .pct { font-family: var(--font-heading); color: var(--gold-deep); }
+  .b-bar { height: 2px; background: rgba(201,168,76,0.2); }
+  .b-bar-fill { height: 100%; background: var(--gold); }
+
+  .b-product-list { padding: 0; list-style: none; margin: 0; }
+  .b-product-list li { padding: 14px 0; border-bottom: 1px dotted rgba(201,168,76,0.4); display: flex; justify-content: space-between; align-items: center; }
+  .b-product-list li:last-child { border-bottom: 0; }
+  .b-product-list .num { font-family: var(--font-heading); font-size: 18px; color: var(--gold); margin-right: 16px; }
+  .b-product-list .info { flex: 1; }
+  .b-product-list .name { font-family: var(--font-body); font-size: 17px; color: var(--larimar-deep); }
+  .b-product-list .meta { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.2em; color: rgba(14,58,84,0.5); text-transform: uppercase; margin-top: 2px; font-weight: 500; }
+  .b-product-list .pct { font-family: var(--font-heading); font-size: 22px; color: var(--gold-deep); }
+
+  /* ===========================================
+     OPTION C — DASHBOARD PRO (CRM-style, dense, dark sidebar)
+     ============================================ */
+  .c-shell { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 16px rgba(14,58,84,0.06); display: grid; grid-template-columns: 220px 1fr; }
+  .c-sidebar { background: var(--midnight); padding: 24px 18px; color: var(--cream); }
+  .c-brand { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.18em; color: var(--gold-light); margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(237,216,160,0.15); text-transform: uppercase; }
+  .c-nav { list-style: none; padding: 0; margin: 0; }
+  .c-nav li { padding: 10px 12px; font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.1em; color: rgba(250,247,240,0.5); text-transform: uppercase; border-radius: 4px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+  .c-nav li:hover { background: rgba(237,216,160,0.05); color: var(--cream); }
+  .c-nav li.active { background: linear-gradient(90deg, rgba(201,168,76,0.18), transparent); color: var(--gold-light); border-left: 3px solid var(--gold); }
+  .c-main { padding: 28px 32px; background: var(--cream); }
+  .c-period { display: inline-flex; gap: 0; border: 1px solid rgba(201,168,76,0.4); border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+  .c-period button { background: #fff; border: 0; padding: 6px 16px; font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.1em; color: rgba(14,58,84,0.55); cursor: pointer; }
+  .c-period button.active { background: var(--larimar-deep); color: var(--cream); }
+  .c-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .c-stat { background: #fff; padding: 16px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.18); }
+  .c-stat .label { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(14,58,84,0.5); font-weight: 500; }
+  .c-stat .value { font-family: var(--font-heading); font-size: 26px; color: var(--navy); margin-top: 4px; line-height: 1.2; }
+  .c-stat .delta { font-family: var(--font-ui); font-size: 11px; margin-top: 4px; font-weight: 500; }
+  .c-stat .delta.up { color: #157f3f; }
+  .c-stat .delta.down { color: #c0392b; }
+  .c-stat .mini-spark { height: 24px; margin-top: 6px; }
+  .c-stat .mini-spark svg { width: 100%; height: 100%; }
+  .c-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .c-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .c-card { background: #fff; padding: 20px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.18); }
+  .c-card h3 { font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--larimar-deep); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(201,168,76,0.12); }
+  .c-bar-row { display: grid; grid-template-columns: 80px 1fr 50px; gap: 12px; align-items: center; padding: 8px 0; font-family: var(--font-ui); font-size: 12px; }
+  .c-bar-row .label { color: var(--navy); font-family: var(--font-body); font-size: 13px; }
+  .c-bar-row .pct { text-align: right; color: var(--gold-deep); font-weight: 600; font-family: var(--font-heading); }
+  .c-bar-row .bar { height: 6px; background: rgba(201,168,76,0.15); border-radius: 3px; overflow: hidden; }
+  .c-bar-row .bar-fill { height: 100%; background: linear-gradient(90deg, var(--ambar-light), var(--ambar)); }
+  .c-table-row { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(201,168,76,0.1); font-family: var(--font-ui); font-size: 13px; }
+  .c-table-row:last-child { border-bottom: 0; }
+  .c-table-row .rank { font-family: var(--font-heading); color: var(--gold); font-size: 14px; }
+  .c-table-row .name { font-family: var(--font-body); color: var(--navy); font-size: 14px; }
+  .c-table-row .sku { font-family: 'SF Mono', Consolas, monospace; font-size: 10px; color: rgba(14,58,84,0.45); }
+  .c-table-row .pct { font-family: var(--font-heading); color: var(--gold-deep); font-size: 14px; font-weight: 600; }
+
+  /* Pick CTA */
+  .pick-cta { background: var(--larimar-deep); color: var(--cream); padding: 32px 40px; border-radius: 8px; text-align: center; margin-bottom: 24px; }
+  .pick-cta h3 { font-family: var(--font-heading); color: var(--gold-light); margin: 0 0 10px; font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .pick-cta p { font-family: var(--font-body); font-size: 16px; opacity: 0.9; margin: 0; }
+</style>
+</head>
+<body>
+
+  <div class="pick-header">
+    <h1>Dashboard · Pick a Style</h1>
+    <div class="nav">
+      <a href="#option-a">Option A · Bento</a>
+      <a href="#option-b">Option B · Editorial</a>
+      <a href="#option-c">Option C · Dashboard Pro</a>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       OPTION A — BENTO GRID
+       ============================================================ -->
+  <div class="option-section" id="option-a">
+    <div class="option-label">
+      <div class="num">A</div>
+      <div class="name">Bento Grid · Modern Asymmetric</div>
+    </div>
+    <div class="option-tagline">Apple/Linear/Stripe-style. Different sized cards for different importance. Big numbers, clean cards, hover lifts. Most "tech-modern" look.</div>
+
+    <div class="a-bento" style="margin-bottom: 16px;">
+      <!-- Big featured: revenue 30d -->
+      <div class="a-cell featured span-2 row-2">
+        <div class="label">Revenue · last 30 days</div>
+        <div class="big-value">$1,049</div>
+        <div class="sub">▲ +18% vs. previous 30 days</div>
+        <div class="a-spark" style="margin-top: 24px;">
+          <div class="bar" style="height: 30%;"></div><div class="bar" style="height: 50%;"></div>
+          <div class="bar" style="height: 70%;"></div><div class="bar" style="height: 60%;"></div>
+          <div class="bar" style="height: 85%;"></div><div class="bar" style="height: 75%;"></div>
+          <div class="bar" style="height: 100%;"></div>
+        </div>
+      </div>
+      <div class="a-cell"><div class="label">Units in Stock</div><div class="big-value">50</div></div>
+      <div class="a-cell gold-accent"><div class="label">Avg Margin</div><div class="big-value" style="color: #157f3f;">65.3%</div></div>
+      <div class="a-cell"><div class="label">Paid Orders 30d</div><div class="big-value">5</div><div class="sub">avg $210</div></div>
+      <div class="a-cell warn"><div class="label">Low Stock</div><div class="big-value">2</div></div>
+      <!-- Inventory value spans 2 -->
+      <div class="a-cell span-2"><div class="label">Inventory Value (at cost)</div><div class="big-value">$1,865</div><div class="sub">across 8 products · $5,370 potential revenue</div></div>
+      <div class="a-cell bad"><div class="label">Out of Stock</div><div class="big-value">1</div></div>
+      <div class="a-cell"><div class="label">Gross Profit 7d</div><div class="big-value" style="color: #157f3f;">$0</div></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
+      <div class="a-list-card">
+        <h3>Margin by Stone</h3>
+        <div class="a-bar-row"><span style="font-family: var(--font-body);">Blue Amber</span><span style="font-family: var(--font-heading); color: var(--gold-deep);">69.8%</span></div>
+        <div class="a-bar"><div class="a-bar-fill" style="width: 100%;"></div></div>
+        <div class="a-bar-row"><span style="font-family: var(--font-body);">Amber</span><span style="font-family: var(--font-heading); color: var(--gold-deep);">65.4%</span></div>
+        <div class="a-bar"><div class="a-bar-fill" style="width: 94%;"></div></div>
+        <div class="a-bar-row"><span style="font-family: var(--font-body);">Larimar</span><span style="font-family: var(--font-heading); color: var(--gold-deep);">63.5%</span></div>
+        <div class="a-bar"><div class="a-bar-fill" style="width: 91%;"></div></div>
+      </div>
+      <div class="a-list-card">
+        <h3>Top Margin</h3>
+        <ul>
+          <li><span class="name">Blue Amber Pendant</span><span class="pct good">69.8%</span></li>
+          <li><span class="name">Larimar Pendant</span><span class="pct good">67.4%</span></li>
+          <li><span class="name">Amber Earrings</span><span class="pct good">67.1%</span></li>
+        </ul>
+      </div>
+      <div class="a-list-card">
+        <h3>Low Stock</h3>
+        <ul>
+          <li><span class="name">Larimar Necklace</span><span class="pct" style="background:#fde0dc;color:#c0392b;">0</span></li>
+          <li><span class="name">Amber Solitaire</span><span class="pct warn">1</span></li>
+          <li><span class="name">Amber Halo</span><span class="pct warn">3</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       OPTION B — EDITORIAL / LUXURY
+       ============================================================ -->
+  <div class="option-section" id="option-b">
+    <div class="option-label">
+      <div class="num">B</div>
+      <div class="name">Editorial Luxury · Magazine Style</div>
+    </div>
+    <div class="option-tagline">Big Cinzel typography, gold dividers, dramatic numbers, lots of white space. Most "on-brand" — feels like a luxury jewelry house's internal report. Reads like a curated story.</div>
+
+    <div class="b-editorial">
+      <!-- Section: This month -->
+      <div class="b-section">
+        <div class="b-eyebrow">Last 30 days · all metrics</div>
+        <h2 class="b-headline">Revenue<br>at a glance</h2>
+        <div class="b-divider"><div class="dot"></div></div>
+
+        <div class="b-stats">
+          <div class="b-stat featured">
+            <div class="label">Revenue</div>
+            <div class="value">$1,049</div>
+            <div class="sub">▲ 18% — continuing the trend</div>
+          </div>
+          <div class="b-stat gold">
+            <div class="label">Avg Order</div>
+            <div class="value">$210</div>
+            <div class="sub">5 paid orders</div>
+          </div>
+          <div class="b-stat good">
+            <div class="label">Avg Margin</div>
+            <div class="value">65.3%</div>
+            <div class="sub">healthy across the line</div>
+          </div>
+          <div class="b-stat">
+            <div class="label">Inventory Value</div>
+            <div class="value">$1,865</div>
+            <div class="sub">at cost · 50 units</div>
+          </div>
+          <div class="b-stat warn">
+            <div class="label">Low Stock</div>
+            <div class="value">2</div>
+            <div class="sub">restock recommended</div>
+          </div>
+          <div class="b-stat bad">
+            <div class="label">Sold Out</div>
+            <div class="value">1</div>
+            <div class="sub">Larimar Gold Necklace</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Margin by category -->
+      <div class="b-section">
+        <div class="b-eyebrow">By stone · by metal · by category</div>
+        <h2 class="b-headline">Where the<br>margin lives</h2>
+        <div class="b-divider"><div class="dot"></div></div>
+
+        <div class="b-cols">
+          <div class="b-col">
+            <h3>By Stone</h3>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Blue Amber</span><span class="pct">69.8%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 100%;"></div></div>
+            </div>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Amber</span><span class="pct">65.4%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 94%;"></div></div>
+            </div>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Larimar</span><span class="pct">63.5%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 91%;"></div></div>
+            </div>
+          </div>
+          <div class="b-col">
+            <h3>By Category</h3>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Pendants</span><span class="pct">68.0%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 100%;"></div></div>
+            </div>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Rings</span><span class="pct">66.3%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 97%;"></div></div>
+            </div>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Bracelets</span><span class="pct">65.1%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 95%;"></div></div>
+            </div>
+            <div class="b-bar-block">
+              <div class="b-bar-label"><span>Earrings</span><span class="pct">62.4%</span></div>
+              <div class="b-bar"><div class="b-bar-fill" style="width: 91%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Top performers -->
+      <div class="b-section">
+        <div class="b-eyebrow">Margin leaders</div>
+        <h2 class="b-headline">The pieces<br>that pay you back</h2>
+        <div class="b-divider"><div class="dot"></div></div>
+
+        <div class="b-cols">
+          <div class="b-col">
+            <h3>Top 5 Margin</h3>
+            <ol class="b-product-list" style="list-style: none; counter-reset: item;">
+              <li><span class="num">01</span><div class="info"><div class="name">Blue Amber Pendant</div><div class="meta">Pendants · Sterling Silver</div></div><span class="pct">69.8%</span></li>
+              <li><span class="num">02</span><div class="info"><div class="name">Larimar Tear Pendant</div><div class="meta">Pendants · Sterling Silver</div></div><span class="pct">67.4%</span></li>
+              <li><span class="num">03</span><div class="info"><div class="name">Amber Drop Earrings</div><div class="meta">Earrings · Sterling Silver</div></div><span class="pct">67.1%</span></li>
+              <li><span class="num">04</span><div class="info"><div class="name">Amber Solitaire Ring</div><div class="meta">Rings · Sterling Silver</div></div><span class="pct">66.3%</span></li>
+              <li><span class="num">05</span><div class="info"><div class="name">Larimar Gold Necklace</div><div class="meta">Necklaces · Gold</div></div><span class="pct">66.0%</span></li>
+            </ol>
+          </div>
+          <div class="b-col">
+            <h3>Needs Attention</h3>
+            <ol class="b-product-list" style="list-style: none;">
+              <li><span class="num">⚠</span><div class="info"><div class="name">Larimar Gold Necklace</div><div class="meta">SOLD OUT</div></div><span class="pct" style="color:#c0392b;">0</span></li>
+              <li><span class="num">⚠</span><div class="info"><div class="name">Amber Solitaire Ring</div><div class="meta">LOW · 1 IN STOCK</div></div><span class="pct" style="color:#b8860b;">1</span></li>
+              <li><span class="num">⚠</span><div class="info"><div class="name">Amber Halo Pendant</div><div class="meta">LOW · 3 IN STOCK</div></div><span class="pct" style="color:#b8860b;">3</span></li>
+              <li><span class="num">i</span><div class="info"><div class="name">Larimar Drop Earrings</div><div class="meta">MARGIN BELOW 60%</div></div><span class="pct" style="color:#b8860b;">58.4%</span></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       OPTION C — DASHBOARD PRO (CRM-style)
+       ============================================================ -->
+  <div class="option-section" id="option-c">
+    <div class="option-label">
+      <div class="num">C</div>
+      <div class="name">Dashboard Pro · CRM-Style</div>
+    </div>
+    <div class="option-tagline">Stripe Dashboard / Linear / HubSpot vibe. Dark sidebar, dense data, mini sparklines, period-toggles. Most data-rich for power users.</div>
+
+    <div class="c-shell">
+      <div class="c-sidebar">
+        <div class="c-brand">A&L Admin</div>
+        <ul class="c-nav">
+          <li class="active">Dashboard</li>
+          <li>Products</li>
+          <li>Inventory</li>
+          <li>Orders</li>
+          <li>Customers</li>
+          <li>Reports</li>
+        </ul>
+      </div>
+      <div class="c-main">
+        <div class="c-period">
+          <button>7D</button>
+          <button class="active">30D</button>
+          <button>90D</button>
+          <button>YTD</button>
+          <button>All</button>
+        </div>
+
+        <div class="c-grid-4">
+          <div class="c-stat">
+            <div class="label">Revenue</div>
+            <div class="value">$1,049</div>
+            <div class="delta up">▲ 18% · vs prev 30d</div>
+            <div class="mini-spark">
+              <svg viewBox="0 0 100 30"><polyline points="0,22 14,18 28,15 42,12 56,9 70,14 84,6 100,4" fill="none" stroke="#157f3f" stroke-width="1.5"/></svg>
+            </div>
+          </div>
+          <div class="c-stat">
+            <div class="label">Orders</div>
+            <div class="value">5</div>
+            <div class="delta up">▲ 2 new vs prev</div>
+            <div class="mini-spark">
+              <svg viewBox="0 0 100 30"><polyline points="0,24 17,22 33,18 50,20 66,15 83,10 100,8" fill="none" stroke="#1A7A9E" stroke-width="1.5"/></svg>
+            </div>
+          </div>
+          <div class="c-stat">
+            <div class="label">Avg Margin</div>
+            <div class="value">65.3%</div>
+            <div class="delta up">▲ 1.2 pts</div>
+            <div class="mini-spark">
+              <svg viewBox="0 0 100 30"><polyline points="0,18 20,17 40,16 60,15 80,13 100,12" fill="none" stroke="#C9A84C" stroke-width="1.5"/></svg>
+            </div>
+          </div>
+          <div class="c-stat">
+            <div class="label">Inventory Value</div>
+            <div class="value">$1,865</div>
+            <div class="delta down">▼ $230 · sold</div>
+            <div class="mini-spark">
+              <svg viewBox="0 0 100 30"><polyline points="0,8 17,9 33,10 50,11 66,13 83,14 100,15" fill="none" stroke="#0E3A54" stroke-width="1.5"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-grid-4" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="c-stat"><div class="label">Total Products</div><div class="value" style="font-size:22px;">8</div></div>
+          <div class="c-stat"><div class="label">Units in Stock</div><div class="value" style="font-size:22px;">50</div></div>
+          <div class="c-stat" style="background:#fef9e8;"><div class="label">Low Stock</div><div class="value" style="color:#b8860b; font-size:22px;">2</div></div>
+          <div class="c-stat" style="background:#fdeae8;"><div class="label">Sold Out</div><div class="value" style="color:#c0392b; font-size:22px;">1</div></div>
+        </div>
+
+        <div class="c-row three">
+          <div class="c-card">
+            <h3>Margin by Stone</h3>
+            <div class="c-bar-row"><span class="label">Blue Amber</span><div class="bar"><div class="bar-fill" style="width:100%;"></div></div><span class="pct">69.8%</span></div>
+            <div class="c-bar-row"><span class="label">Amber</span><div class="bar"><div class="bar-fill" style="width:94%;"></div></div><span class="pct">65.4%</span></div>
+            <div class="c-bar-row"><span class="label">Larimar</span><div class="bar"><div class="bar-fill" style="width:91%;"></div></div><span class="pct">63.5%</span></div>
+          </div>
+          <div class="c-card">
+            <h3>Margin by Metal</h3>
+            <div class="c-bar-row"><span class="label">Sterling</span><div class="bar"><div class="bar-fill" style="width:96%;"></div></div><span class="pct">65.1%</span></div>
+            <div class="c-bar-row"><span class="label">Gold</span><div class="bar"><div class="bar-fill" style="width:97%;"></div></div><span class="pct">66.0%</span></div>
+            <div class="c-bar-row"><span class="label">Plated</span><div class="bar"><div class="bar-fill" style="width:0%;"></div></div><span class="pct">—</span></div>
+          </div>
+          <div class="c-card">
+            <h3>Margin by Category</h3>
+            <div class="c-bar-row"><span class="label">Pendants</span><div class="bar"><div class="bar-fill" style="width:100%;"></div></div><span class="pct">68.0%</span></div>
+            <div class="c-bar-row"><span class="label">Rings</span><div class="bar"><div class="bar-fill" style="width:97%;"></div></div><span class="pct">66.3%</span></div>
+            <div class="c-bar-row"><span class="label">Bracelets</span><div class="bar"><div class="bar-fill" style="width:95%;"></div></div><span class="pct">65.1%</span></div>
+            <div class="c-bar-row"><span class="label">Earrings</span><div class="bar"><div class="bar-fill" style="width:91%;"></div></div><span class="pct">62.4%</span></div>
+          </div>
+        </div>
+
+        <div class="c-row">
+          <div class="c-card">
+            <h3>Top Margin Products</h3>
+            <div class="c-table-row"><span class="rank">1</span><div><div class="name">Blue Amber Pendant</div><div class="sku">AL-BAMSS-PND-006</div></div><span class="pct">69.8%</span></div>
+            <div class="c-table-row"><span class="rank">2</span><div><div class="name">Larimar Tear Pendant</div><div class="sku">AL-LARSS-PND-002</div></div><span class="pct">67.4%</span></div>
+            <div class="c-table-row"><span class="rank">3</span><div><div class="name">Amber Drop Earrings</div><div class="sku">AL-AMBSS-EAR-003</div></div><span class="pct">67.1%</span></div>
+            <div class="c-table-row"><span class="rank">4</span><div><div class="name">Amber Solitaire Ring</div><div class="sku">AL-AMBSS-RNG-008</div></div><span class="pct">66.3%</span></div>
+            <div class="c-table-row"><span class="rank">5</span><div><div class="name">Larimar Gold Necklace</div><div class="sku">AL-LARGO-NCK-005</div></div><span class="pct">66.0%</span></div>
+          </div>
+          <div class="c-card">
+            <h3>Low Stock Alerts</h3>
+            <div class="c-table-row" style="background:#fdeae8;"><span class="rank" style="color:#c0392b;">⚠</span><div><div class="name">Larimar Gold Necklace</div><div class="sku">AL-LARGO-NCK-005</div></div><span class="pct" style="color:#c0392b;">0</span></div>
+            <div class="c-table-row" style="background:#fef9e8;"><span class="rank" style="color:#b8860b;">⚠</span><div><div class="name">Amber Solitaire Ring</div><div class="sku">AL-AMBSS-RNG-008</div></div><span class="pct" style="color:#b8860b;">1</span></div>
+            <div class="c-table-row" style="background:#fef9e8;"><span class="rank" style="color:#b8860b;">⚠</span><div><div class="name">Amber Halo Pendant</div><div class="sku">AL-AMBSS-PND-004</div></div><span class="pct" style="color:#b8860b;">3</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pick CTA -->
+  <div class="option-section">
+    <div class="pick-cta">
+      <h3>Tell me which one</h3>
+      <p>Reply with "ship A", "ship B", or "ship C" — I'll wire it into the live admin and push.</p>
+    </div>
+  </div>
+
+</body>
+</html>

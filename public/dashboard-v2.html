@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard v2 — Ambar & Larimar Admin</title>
+<link rel="stylesheet" href="/brand-preview.css">
+<style>
+  /* Reset to a calmer, more legible baseline */
+  body {
+    background: #f6f1e6;
+    padding: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: #0C1420;
+  }
+
+  /* Admin chrome (header + tabs) */
+  .admin-header {
+    background: var(--navy); color: var(--cream);
+    padding: 18px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .admin-header .brand { font-family: var(--font-heading); font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cream); }
+  .admin-header .meta { font-family: var(--font-ui); font-size: 12px; color: rgba(250,247,240,0.6); letter-spacing: 0.1em; }
+
+  .tabs { background: #fff; border-bottom: 1px solid rgba(14,58,84,0.08); padding: 0 40px; display: flex; }
+  .tab { padding: 16px 24px; font-family: var(--font-ui); font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(14,58,84,0.45); border-bottom: 2px solid transparent; cursor: pointer; font-weight: 500; transition: color .15s; }
+  .tab:hover { color: rgba(14,58,84,0.7); }
+  .tab.active { color: var(--navy); border-bottom-color: var(--ambar); }
+
+  /* Content shell */
+  .shell { max-width: 1280px; margin: 0 auto; padding: 40px; }
+
+  /* Greeting / period */
+  .greeting { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; }
+  .greeting h1 { font-family: var(--font-heading); font-size: 30px; font-weight: 500; letter-spacing: 0.06em; color: var(--larimar-deep); margin: 0; line-height: 1.2; text-transform: none; }
+  .greeting .sub { font-family: var(--font-body); font-size: 18px; color: rgba(14,58,84,0.65); margin-top: 6px; font-style: italic; }
+  .period-pills { display: flex; gap: 6px; position: relative; }
+  .period-pills button {
+    background: transparent; border: 1px solid rgba(201,168,76,0.35);
+    padding: 8px 16px; font-family: var(--font-ui); font-size: 12px;
+    letter-spacing: 0.12em; color: var(--gold-deep); border-radius: 999px; cursor: pointer; font-weight: 500;
+    transition: all .15s; white-space: nowrap;
+  }
+  .period-pills button:hover { background: rgba(201,168,76,0.08); }
+  .period-pills button.active { background: var(--larimar-deep); color: var(--cream); border-color: var(--larimar-deep); }
+  .period-pills button.custom { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Custom date-range popover */
+  .range-popover {
+    position: absolute; top: 48px; right: 0; z-index: 50;
+    background: #fff; border-radius: 12px; padding: 22px; width: 380px;
+    box-shadow: 0 12px 40px rgba(14,58,84,0.18);
+    border: 1px solid rgba(201,168,76,0.25);
+  }
+  .range-popover::before {
+    content: ''; position: absolute; top: -7px; right: 28px;
+    width: 12px; height: 12px; background: #fff;
+    border-top: 1px solid rgba(201,168,76,0.25); border-left: 1px solid rgba(201,168,76,0.25);
+    transform: rotate(45deg);
+  }
+  .range-popover h4 {
+    font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(14,58,84,0.55); margin: 0 0 12px; font-weight: 600;
+  }
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 22px; }
+  .preset-grid button {
+    background: var(--cream); border: 1px solid transparent;
+    padding: 10px 14px; text-align: left; cursor: pointer;
+    font-family: var(--font-body); font-size: 14px; color: var(--larimar-deep);
+    border-radius: 6px; transition: all .15s;
+  }
+  .preset-grid button:hover { background: rgba(201,168,76,0.1); }
+  .preset-grid button.selected { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold-deep); font-weight: 600; }
+
+  .range-divider {
+    height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+    margin-bottom: 18px;
+  }
+  .range-inputs { display: grid; grid-template-columns: 1fr 12px 1fr; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .range-inputs .arrow { color: rgba(14,58,84,0.4); text-align: center; font-family: var(--font-body); font-size: 16px; }
+  .range-input-block label {
+    font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(14,58,84,0.5); display: block; margin-bottom: 4px; font-weight: 500;
+  }
+  .range-input-block input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid rgba(201,168,76,0.35); border-radius: 6px;
+    font-family: var(--font-body); font-size: 15px; color: var(--larimar-deep);
+    background: var(--cream);
+  }
+  .range-input-block input:focus { outline: none; border-color: var(--gold); background: #fff; }
+
+  .range-summary {
+    background: var(--cream); padding: 10px 14px; border-radius: 6px;
+    font-family: var(--font-body); font-size: 14px; color: var(--larimar-deep);
+    margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .range-summary .days { font-family: var(--font-heading); color: var(--gold-deep); font-weight: 500; }
+
+  .range-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .range-actions button {
+    padding: 10px 22px; font-family: var(--font-ui); font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer;
+    border-radius: 999px; border: 0; font-weight: 600;
+  }
+  .range-actions .cancel { background: transparent; color: rgba(14,58,84,0.55); }
+  .range-actions .cancel:hover { color: var(--larimar-deep); }
+  .range-actions .apply {
+    background: var(--larimar-deep); color: var(--cream);
+  }
+  .range-actions .apply:hover { background: var(--larimar-mid); }
+
+  /* Compare-to row */
+  .compare-row {
+    display: flex; align-items: center; gap: 10px; padding-top: 14px;
+    border-top: 1px solid rgba(201,168,76,0.15); margin-top: 8px;
+  }
+  .compare-row label {
+    font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: rgba(14,58,84,0.6); cursor: pointer; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .compare-row input[type="checkbox"] { accent-color: var(--ambar-light); }
+  .compare-row select {
+    padding: 4px 10px; border: 1px solid rgba(201,168,76,0.3); border-radius: 4px;
+    font-family: var(--font-ui); font-size: 11px; color: var(--larimar-deep); background: #fff;
+    letter-spacing: 0.05em;
+  }
+
+  /* HERO row — one big number + 2 supporting */
+  .hero { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  .hero-card {
+    background: #fff; border-radius: 16px; padding: 32px;
+    border: 1px solid rgba(201,168,76,0.18);
+    transition: transform .2s;
+  }
+  .hero-card:hover { transform: translateY(-2px); }
+  .hero-card .label {
+    font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold-deep); font-weight: 600; margin-bottom: 14px;
+  }
+  .hero-card .number {
+    font-family: var(--font-heading); font-size: 64px; font-weight: 500; line-height: 1;
+    color: var(--larimar-deep); letter-spacing: 0.02em;
+  }
+  .hero-card .delta {
+    font-family: var(--font-ui); font-size: 14px; margin-top: 14px; display: flex; gap: 10px; align-items: center;
+  }
+  .hero-card .delta .pill {
+    background: #e0f5e0; color: #157f3f; padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .hero-card .delta .pill.down { background: #fde0dc; color: #c0392b; }
+  .hero-card .delta .ctx { color: rgba(14,58,84,0.6); font-style: italic; }
+
+  /* Featured (revenue) hero card */
+  .hero-card.feature {
+    background: linear-gradient(135deg, #0E3A54 0%, #08080E 100%);
+    border: 0; color: var(--cream); position: relative; overflow: hidden;
+  }
+  .hero-card.feature::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,184,48,0.18) 0%, transparent 70%);
+  }
+  .hero-card.feature .label { color: var(--gold-light); }
+  .hero-card.feature .number {
+    color: var(--cream); font-size: 84px;
+    background: linear-gradient(135deg, #FAF7F0 0%, #EDD8A0 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-card.feature .delta .ctx { color: rgba(237,216,160,0.85); }
+  .hero-card.feature .footnote {
+    margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(237,216,160,0.2);
+    font-family: var(--font-ui); font-size: 13px; color: rgba(237,216,160,0.75); letter-spacing: 0.04em;
+  }
+  .hero-card.feature .footnote span { color: var(--gold-light); font-weight: 600; }
+
+  /* Mini KPI row — 4 secondary metrics */
+  .mini-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 48px; }
+  .mini-kpi {
+    background: #fff; border-radius: 12px; padding: 20px 22px;
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+  .mini-kpi .label { font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(14,58,84,0.55); font-weight: 500; margin-bottom: 6px; }
+  .mini-kpi .number { font-family: var(--font-heading); font-size: 32px; color: var(--navy); line-height: 1.1; font-weight: 500; }
+  .mini-kpi.warn .number { color: #b8860b; }
+  .mini-kpi.bad .number { color: #c0392b; }
+  .mini-kpi.good .number { color: #157f3f; }
+  .mini-kpi .icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .mini-kpi .icon { font-size: 16px; }
+
+  /* Section header */
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(201,168,76,0.25); }
+  .section-head h2 {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 500; letter-spacing: 0.1em;
+    color: var(--larimar-deep); margin: 0; text-transform: uppercase;
+  }
+  .section-head .hint { font-family: var(--font-body); font-size: 16px; color: rgba(14,58,84,0.6); font-style: italic; }
+
+  /* PRODUCT SPOTLIGHT GRID — 3 column showcase */
+  .spotlights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-bottom: 56px; }
+  .spotlight {
+    background: #fff; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(201,168,76,0.18);
+  }
+  .spotlight-head { padding: 22px 24px 14px; border-bottom: 1px solid rgba(201,168,76,0.12); }
+  .spotlight-icon {
+    font-size: 28px; margin-bottom: 8px; display: inline-block;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)); padding: 10px;
+    border-radius: 12px; line-height: 1;
+  }
+  .spotlight-title {
+    font-family: var(--font-heading); font-size: 16px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--larimar-deep); margin: 4px 0; font-weight: 500;
+  }
+  .spotlight-sub { font-family: var(--font-body); font-size: 14px; color: rgba(14,58,84,0.6); font-style: italic; }
+
+  .spotlight-list { padding: 8px 0; }
+  .spotlight-row {
+    display: flex; gap: 14px; align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+    transition: background .15s;
+  }
+  .spotlight-row:last-child { border-bottom: 0; }
+  .spotlight-row:hover { background: #faf7ee; }
+  .spotlight-rank {
+    font-family: var(--font-heading); font-size: 22px; color: var(--gold);
+    width: 28px; text-align: center; flex-shrink: 0; font-weight: 500;
+  }
+  .product-thumb {
+    width: 56px; height: 56px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #B8E8F4, #1A7A9E);
+    color: #fff; font-family: var(--font-heading); font-size: 22px; font-weight: 500;
+  }
+  .product-thumb.amber { background: linear-gradient(135deg, #FFD074, #6B3000); }
+  .product-thumb.bamber { background: linear-gradient(135deg, #72CCE0, #08283A); }
+  .product-thumb.gold { background: linear-gradient(135deg, #EDD8A0, #8A6418); color: var(--navy); }
+
+  .product-info { flex: 1; min-width: 0; }
+  .product-info .name {
+    font-family: var(--font-body); font-size: 16px; color: var(--larimar-deep);
+    line-height: 1.3; margin-bottom: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .product-info .meta {
+    font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(14,58,84,0.5); font-weight: 500;
+  }
+  .product-stat {
+    text-align: right; flex-shrink: 0;
+  }
+  .product-stat .big {
+    font-family: var(--font-heading); font-size: 22px; color: var(--gold-deep);
+    line-height: 1; font-weight: 500;
+  }
+  .product-stat .small {
+    font-family: var(--font-ui); font-size: 11px; color: rgba(14,58,84,0.5);
+    margin-top: 4px; letter-spacing: 0.05em;
+  }
+
+  /* Insight callout */
+  .insight {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #FAF7F0, #f0e9d4);
+    border-left: 4px solid var(--ambar);
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-bottom: 56px;
+    display: flex; gap: 18px; align-items: flex-start;
+  }
+  .insight-icon { font-size: 32px; line-height: 1; flex-shrink: 0; }
+  .insight-text { flex: 1; }
+  .insight-text .label {
+    font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ambar); font-weight: 600; margin-bottom: 6px;
+  }
+  .insight-text .body {
+    font-family: var(--font-body); font-size: 18px; color: var(--larimar-deep);
+    line-height: 1.55;
+  }
+  .insight-text .body b { color: var(--gold-deep); }
+
+  /* Margin breakdown row */
+  .breakdown { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-bottom: 56px; }
+  .breakdown-card { background: #fff; border-radius: 14px; padding: 24px; border: 1px solid rgba(201,168,76,0.18); }
+  .breakdown-card h3 { font-family: var(--font-heading); font-size: 15px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--larimar-deep); margin: 0 0 18px; font-weight: 500; }
+  .bar-block { margin-bottom: 18px; }
+  .bar-block:last-child { margin-bottom: 0; }
+  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .bar-label .name { font-family: var(--font-body); font-size: 16px; color: var(--larimar-deep); }
+  .bar-label .pct { font-family: var(--font-heading); font-size: 18px; color: var(--gold-deep); font-weight: 500; }
+  .bar { height: 10px; background: rgba(201,168,76,0.15); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 999px; }
+
+  /* Alerts row */
+  .alerts { background: #fff; border-radius: 14px; padding: 28px; border: 1px solid rgba(201,168,76,0.18); margin-bottom: 32px; }
+  .alerts h2 {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 500; letter-spacing: 0.1em;
+    color: var(--larimar-deep); margin: 0 0 4px; text-transform: uppercase;
+  }
+  .alerts .hint { font-family: var(--font-body); font-size: 16px; color: rgba(14,58,84,0.6); font-style: italic; margin-bottom: 22px; }
+  .alert-row {
+    display: flex; align-items: center; gap: 16px; padding: 14px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+  .alert-row:last-child { border-bottom: 0; }
+  .alert-icon { font-size: 22px; flex-shrink: 0; }
+  .alert-row .name { flex: 1; font-family: var(--font-body); font-size: 17px; color: var(--larimar-deep); }
+  .alert-row .name .sku { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; color: rgba(14,58,84,0.45); margin-right: 12px; }
+  .alert-row .status { font-family: var(--font-heading); font-size: 18px; font-weight: 500; }
+  .alert-row .status.bad { color: #c0392b; }
+  .alert-row .status.warn { color: #b8860b; }
+  .alert-row .action {
+    background: var(--larimar-mid); color: #fff; padding: 8px 16px; border-radius: 999px;
+    font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer;
+    border: 0; font-weight: 600;
+  }
+
+  /* Reference banner */
+  .design-note {
+    background: var(--navy); color: var(--cream); padding: 24px 28px;
+    border-radius: 12px; margin-bottom: 24px; display: flex; gap: 18px;
+  }
+  .design-note .label { font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.3em; color: var(--gold-light); text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+  .design-note .body { font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  .design-note .body b { color: var(--gold-light); }
+</style>
+</head>
+<body>
+
+  <div class="admin-header">
+    <div class="brand">Ambar & Larimar Admin</div>
+    <div class="meta">Caribbean Time · Tuesday Apr 25</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">Dashboard</div>
+    <div class="tab">Products</div>
+    <div class="tab">Inventory</div>
+    <div class="tab">Orders</div>
+  </div>
+
+  <div class="shell">
+
+    <div class="design-note">
+      <div>
+        <div class="label">Dashboard v2</div>
+        <div class="body">Bigger fonts. More whitespace. Three product spotlights — <b>Best Sellers</b>, <b>Most Profitable</b>, <b>Most Viewed but Not Sold</b>. Designed to be readable at a glance, like a Stripe / Linear / Vercel dashboard but with our brand voice.</div>
+      </div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting">
+      <div>
+        <h1>Good morning, Eddy</h1>
+        <div class="sub">Here's how the shop did in the last 30 days.</div>
+      </div>
+      <div class="period-pills">
+        <button>7 days</button>
+        <button class="active">30 days</button>
+        <button>90 days</button>
+        <button>This year</button>
+        <button class="custom">📅 Custom</button>
+
+        <!-- Custom date range popover (shown open here for the preview) -->
+        <div class="range-popover">
+          <h4>Quick presets</h4>
+          <div class="preset-grid">
+            <button>Today</button>
+            <button>Yesterday</button>
+            <button>Last 7 days</button>
+            <button>Last 30 days</button>
+            <button>This month</button>
+            <button>Last month</button>
+            <button>This quarter</button>
+            <button>This year</button>
+            <button>Last year</button>
+            <button class="selected">All time</button>
+          </div>
+
+          <div class="range-divider"></div>
+
+          <h4>Custom range</h4>
+          <div class="range-inputs">
+            <div class="range-input-block">
+              <label>From</label>
+              <input type="date" value="2026-03-01">
+            </div>
+            <div class="arrow">→</div>
+            <div class="range-input-block">
+              <label>To</label>
+              <input type="date" value="2026-04-25">
+            </div>
+          </div>
+
+          <div class="range-summary">
+            <span>Mar 1 — Apr 25, 2026</span>
+            <span class="days">55 days</span>
+          </div>
+
+          <div class="compare-row">
+            <label>
+              <input type="checkbox" checked>
+              Compare to
+            </label>
+            <select>
+              <option>Previous period</option>
+              <option>Same period last year</option>
+              <option>No comparison</option>
+            </select>
+          </div>
+
+          <div class="range-actions" style="margin-top: 18px;">
+            <button class="cancel">Cancel</button>
+            <button class="apply">Apply range</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO row -->
+    <div class="hero">
+      <div class="hero-card feature">
+        <div class="label">Revenue</div>
+        <div class="number">$1,049</div>
+        <div class="delta"><span class="pill">▲ 18%</span><span class="ctx">vs. previous 30 days</span></div>
+        <div class="footnote">5 paid orders · <span>$210</span> avg order value · <span>$685</span> gross profit</div>
+      </div>
+      <div class="hero-card">
+        <div class="label">Inventory Value</div>
+        <div class="number">$1,865</div>
+        <div class="delta"><span class="pill down">▼ $230</span><span class="ctx">moved with sales</span></div>
+      </div>
+      <div class="hero-card">
+        <div class="label">Avg Margin</div>
+        <div class="number" style="color: #157f3f;">65.3%</div>
+        <div class="delta"><span class="pill">▲ 1.2 pts</span><span class="ctx">healthy across the line</span></div>
+      </div>
+    </div>
+
+    <!-- Mini KPIs -->
+    <div class="mini-kpis">
+      <div class="mini-kpi">
+        <div class="icon-row"><span class="icon">📦</span><span class="label">Units in Stock</span></div>
+        <div class="number">50</div>
+      </div>
+      <div class="mini-kpi">
+        <div class="icon-row"><span class="icon">💎</span><span class="label">Total Products</span></div>
+        <div class="number">8</div>
+      </div>
+      <div class="mini-kpi warn">
+        <div class="icon-row"><span class="icon">⚠️</span><span class="label">Low Stock</span></div>
+        <div class="number">2</div>
+      </div>
+      <div class="mini-kpi bad">
+        <div class="icon-row"><span class="icon">🚫</span><span class="label">Sold Out</span></div>
+        <div class="number">1</div>
+      </div>
+    </div>
+
+    <!-- Insight callout -->
+    <div class="insight">
+      <div class="insight-icon">💡</div>
+      <div class="insight-text">
+        <div class="label">Smart insight</div>
+        <div class="body"><b>Larimar Drop Earrings</b> have been viewed <b>284 times</b> but only sold <b>3</b>. Your conversion rate is unusually low for this piece — try better photos, or test a $79 price point (currently $89).</div>
+      </div>
+    </div>
+
+    <!-- PRODUCT SPOTLIGHTS -->
+    <div class="section-head">
+      <h2>Product Spotlights</h2>
+      <span class="hint">What's selling, what's printing money, what people want</span>
+    </div>
+
+    <div class="spotlights">
+      <!-- BEST SELLERS -->
+      <div class="spotlight">
+        <div class="spotlight-head">
+          <span class="spotlight-icon">🏆</span>
+          <div class="spotlight-title">Best Sellers</div>
+          <div class="spotlight-sub">Most units sold · 30 days</div>
+        </div>
+        <div class="spotlight-list">
+          <div class="spotlight-row">
+            <span class="spotlight-rank">1</span>
+            <div class="product-thumb larimar">L</div>
+            <div class="product-info">
+              <div class="name">Larimar Drop Earrings</div>
+              <div class="meta">Earrings · Silver</div>
+            </div>
+            <div class="product-stat"><div class="big">12</div><div class="small">sold</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">2</span>
+            <div class="product-thumb amber">A</div>
+            <div class="product-info">
+              <div class="name">Amber Drop Earrings</div>
+              <div class="meta">Earrings · Silver</div>
+            </div>
+            <div class="product-stat"><div class="big">8</div><div class="small">sold</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">3</span>
+            <div class="product-thumb larimar">L</div>
+            <div class="product-info">
+              <div class="name">Larimar Cuff Bracelet</div>
+              <div class="meta">Bracelets · Silver</div>
+            </div>
+            <div class="product-stat"><div class="big">6</div><div class="small">sold</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOST PROFITABLE -->
+      <div class="spotlight">
+        <div class="spotlight-head">
+          <span class="spotlight-icon">💰</span>
+          <div class="spotlight-title">Most Profitable</div>
+          <div class="spotlight-sub">Total gross profit · 30 days</div>
+        </div>
+        <div class="spotlight-list">
+          <div class="spotlight-row">
+            <span class="spotlight-rank">1</span>
+            <div class="product-thumb larimar">L</div>
+            <div class="product-info">
+              <div class="name">Larimar Tear Pendant</div>
+              <div class="meta">67.4% margin · 4 sold</div>
+            </div>
+            <div class="product-stat"><div class="big">$348</div><div class="small">profit</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">2</span>
+            <div class="product-thumb larimar">L</div>
+            <div class="product-info">
+              <div class="name">Larimar Drop Earrings</div>
+              <div class="meta">58.4% margin · 12 sold</div>
+            </div>
+            <div class="product-stat"><div class="big">$312</div><div class="small">profit</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">3</span>
+            <div class="product-thumb bamber">B</div>
+            <div class="product-info">
+              <div class="name">Blue Amber Pendant</div>
+              <div class="meta">69.8% margin · 2 sold</div>
+            </div>
+            <div class="product-stat"><div class="big">$222</div><div class="small">profit</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOST VIEWED BUT NOT SOLD -->
+      <div class="spotlight">
+        <div class="spotlight-head">
+          <span class="spotlight-icon">👁️</span>
+          <div class="spotlight-title">Most Viewed</div>
+          <div class="spotlight-sub">Pageviews not converting</div>
+        </div>
+        <div class="spotlight-list">
+          <div class="spotlight-row">
+            <span class="spotlight-rank">1</span>
+            <div class="product-thumb gold">G</div>
+            <div class="product-info">
+              <div class="name">Larimar Gold Necklace</div>
+              <div class="meta">0 sold · sold out</div>
+            </div>
+            <div class="product-stat"><div class="big">412</div><div class="small">views</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">2</span>
+            <div class="product-thumb larimar">L</div>
+            <div class="product-info">
+              <div class="name">Larimar Drop Earrings</div>
+              <div class="meta">12 sold · 2.3% conv.</div>
+            </div>
+            <div class="product-stat"><div class="big">284</div><div class="small">views</div></div>
+          </div>
+          <div class="spotlight-row">
+            <span class="spotlight-rank">3</span>
+            <div class="product-thumb amber">A</div>
+            <div class="product-info">
+              <div class="name">Amber Solitaire Ring</div>
+              <div class="meta">1 sold · 0.5% conv.</div>
+            </div>
+            <div class="product-stat"><div class="big">198</div><div class="small">views</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARGIN BREAKDOWN -->
+    <div class="section-head">
+      <h2>Margin Breakdown</h2>
+      <span class="hint">Where your gross profit comes from</span>
+    </div>
+
+    <div class="breakdown">
+      <div class="breakdown-card">
+        <h3>By Stone</h3>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Blue Amber</span><span class="pct">69.8%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Amber</span><span class="pct">65.4%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 94%;"></div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Larimar</span><span class="pct">63.5%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 91%;"></div></div>
+        </div>
+      </div>
+      <div class="breakdown-card">
+        <h3>By Metal</h3>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Gold</span><span class="pct">66.0%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Sterling Silver</span><span class="pct">65.1%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 99%;"></div></div>
+        </div>
+      </div>
+      <div class="breakdown-card">
+        <h3>By Category</h3>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Pendants</span><span class="pct">68.0%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Rings</span><span class="pct">66.3%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 97%;"></div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-label"><span class="name">Bracelets</span><span class="pct">65.1%</span></div>
+          <div class="bar"><div class="bar-fill" style="width: 95%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="alerts">
+      <h2>Needs your attention</h2>
+      <div class="hint">Stock running low or already gone</div>
+      <div class="alert-row">
+        <span class="alert-icon">🚫</span>
+        <div class="name"><span class="sku">AL-LARGO-NCK-005</span>Larimar Gold Necklace</div>
+        <div class="status bad">0 left</div>
+        <button class="action">Restock</button>
+      </div>
+      <div class="alert-row">
+        <span class="alert-icon">⚠️</span>
+        <div class="name"><span class="sku">AL-AMBSS-RNG-008</span>Amber Solitaire Ring</div>
+        <div class="status warn">1 left</div>
+        <button class="action">Restock</button>
+      </div>
+      <div class="alert-row">
+        <span class="alert-icon">⚠️</span>
+        <div class="name"><span class="sku">AL-AMBSS-PND-004</span>Amber Halo Pendant</div>
+        <div class="status warn">3 left</div>
+        <button class="action">Restock</button>
+      </div>
+    </div>
+
+    <div class="design-note" style="background: linear-gradient(135deg, #0E3A54, #08080E);">
+      <div>
+        <div class="label">One thing to know</div>
+        <div class="body">"Most Viewed" needs page-view tracking — currently the product detail page doesn't increment a counter. Once you say "ship", I'll add a <code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:3px; font-family:monospace; font-size:14px;">view_count</code> column to products + auto-increment on every detail-page load. Vercel handles this server-side cleanly. Then the <b>Most Viewed</b> spotlight becomes real, not mock.</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

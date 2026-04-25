@@ -59,6 +59,9 @@ export async function initDatabase() {
   try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_cost NUMERIC(10,2) DEFAULT 0`; } catch { /* exists */ }
   try { await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products (sku) WHERE sku != ''`; } catch { /* exists */ }
 
+  // View counter for "Most Viewed" dashboard spotlight
+  try { await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0`; } catch { /* exists */ }
+
   // Orders table
   await sql`
     CREATE TABLE IF NOT EXISTS orders (
